@@ -1,5 +1,5 @@
 # DLBCSDSJCL01 — Data Structures and Java Class Library
-
+| Data Structures and Java Class Library (DLBCSDSJCL01) | 🔄 Attempt 3 in prep | [DLBCSDSJCL01_Java-Class-Library](./DLBCSDSJCL01_Java-Class-Library) |
 **Module:** Data Structures and Java Class Library  
 **Program:** B.Sc. Business IT — IU International University of Applied Sciences  
 **Status:** In progress — two failed attempts, preparing for attempt 3  
