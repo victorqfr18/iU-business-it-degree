@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Notes</title>
+<meta name="description" content="A simple, fast checklist notebook that looks and feels like the iPhone Notes app. Everything saves in your browser.">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Notes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23fff'/%3E%3Crect width='64' height='16' rx='0' fill='%23ffd60a'/%3E%3Cpath d='M12 30h40M12 41h40M12 52h24' stroke='%238e8e93' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#ffffff;            /* note paper */
+    --bg2:#f2f2f7;           /* list ground */
+    --text:#1c1c1e;
+    --text2:#6e6e73;
+    --text3:#8e8e93;
+    --line:rgba(60,60,67,.22);
+    --accent:#c99700;        /* Notes gold on white */
+    --accent-soft:rgba(201,151,0,.16);
+    --sel:rgba(201,151,0,.18);
+    --hover:rgba(60,60,67,.06);
+    --field:rgba(118,118,128,.12);
+    --pop:#ffffff;
+    --shadow:0 10px 40px rgba(0,0,0,.16), 0 0 0 .5px rgba(0,0,0,.08);
+    --check-fg:#ffffff;
+    --danger:#e0362c;
+    --toast:#1c1c1e;
+    --toast-fg:#ffffff;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1c1c1e; --bg2:#000000; --text:#f2f2f7; --text2:#a1a1a6; --text3:#8d8d93;
+      --line:rgba(84,84,88,.55); --accent:#ffd60a; --accent-soft:rgba(255,214,10,.18); --sel:rgba(255,214,10,.16);
+      --hover:rgba(255,255,255,.06); --field:rgba(118,118,128,.24); --pop:#2c2c2e;
+      --shadow:0 10px 40px rgba(0,0,0,.6), 0 0 0 .5px rgba(255,255,255,.1);
+      --check-fg:#1c1c1e; --danger:#ff453a; --toast:#f2f2f7; --toast-fg:#1c1c1e;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1c1c1e; --bg2:#000000; --text:#f2f2f7; --text2:#a1a1a6; --text3:#8d8d93;
+    --line:rgba(84,84,88,.55); --accent:#ffd60a; --accent-soft:rgba(255,214,10,.18); --sel:rgba(255,214,10,.16);
+    --hover:rgba(255,255,255,.06); --field:rgba(118,118,128,.24); --pop:#2c2c2e;
+    --shadow:0 10px 40px rgba(0,0,0,.6), 0 0 0 .5px rgba(255,255,255,.1);
+    --check-fg:#1c1c1e; --danger:#ff453a; --toast:#f2f2f7; --toast-fg:#1c1c1e;
+  }
+
+  *,*::before,*::after{box-sizing:border-box}
+  [hidden]{display:none !important}
+  html,body{height:100%;margin:0}
+  body{
+    background:var(--bg2); color:var(--text); font-family:var(--font);
+    -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;
+    overscroll-behavior:none; touch-action:manipulation;
+  }
+  button{font:inherit; color:inherit; background:none; border:0; padding:0; margin:0; cursor:pointer}
+  button:focus-visible,input:focus-visible,[role=option]:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px}
+  svg{display:block}
+
+  /* ---------- layout ---------- */
+  .app{position:fixed; inset:0; display:flex; overflow:hidden}
+  .side{flex:none; width:320px; display:flex; flex-direction:column; background:var(--bg2); border-right:.5px solid var(--line); min-height:0}
+  .main{flex:1; min-width:0; display:flex; flex-direction:column; background:var(--bg); position:relative}
+
+  /* ---------- sidebar ---------- */
+  .side-head{display:flex; align-items:flex-end; justify-content:space-between; padding:calc(14px + env(safe-area-inset-top,0px)) 16px 6px}
+  .side-head h1{font-size:34px; line-height:1.1; font-weight:700; letter-spacing:-.02em; margin:0}
+  .search-wrap{position:relative; margin:6px 16px 8px}
+  .search-wrap svg{position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--text3)}
+  .search-wrap input{
+    width:100%; height:36px; padding:0 30px 0 32px; border:0; border-radius:10px; background:var(--field); color:var(--text);
+    font:inherit; font-size:17px; -webkit-appearance:none; appearance:none;
+  }
+  .search-wrap input::placeholder{color:var(--text3)}
+  .search-wrap input::-webkit-search-cancel-button{-webkit-appearance:none}
+  .search-clear{position:absolute; right:6px; top:50%; transform:translateY(-50%); width:24px; height:24px; display:grid; place-items:center; color:var(--text3)}
+  .search-clear[hidden]{display:none}
+  .list{flex:1; overflow-y:auto; padding:0 12px 12px; -webkit-overflow-scrolling:touch}
+  .group{margin-top:10px}
+  .group h2{font-size:20px; font-weight:700; margin:12px 4px 6px; letter-spacing:-.01em}
+  .group .rows{background:var(--bg); border-radius:12px; overflow:hidden}
+  .row{display:block; width:100%; text-align:left; padding:10px 14px; position:relative; -webkit-user-select:none; user-select:none}
+  .row + .row::before{content:""; position:absolute; left:14px; right:0; top:0; border-top:.5px solid var(--line)}
+  .row[aria-selected="true"]{background:var(--sel)}
+  .row[aria-selected="true"]::before, .row[aria-selected="true"] + .row::before{border-color:transparent}
+  .row:hover:not([aria-selected="true"]){background:var(--hover)}
+  .row .t{font-size:16px; font-weight:600; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .row .s{display:flex; gap:8px; font-size:13px; line-height:1.35; margin-top:2px; color:var(--text3); min-width:0}
+  .row .s .d{color:var(--text); flex:none; font-variant-numeric:tabular-nums}
+  .row .s .p{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .row .s .n{flex:none; margin-left:auto; padding-left:8px; font-variant-numeric:tabular-nums}
+  .side-foot{text-align:center; font-size:12px; color:var(--text3); padding:8px 16px calc(10px + env(safe-area-inset-bottom,0px)); border-top:.5px solid var(--line)}
+  .nores{color:var(--text3); text-align:center; padding:40px 12px; font-size:15px}
+
+  /* ---------- editor ---------- */
+  .bar{display:flex; align-items:center; gap:4px; padding:calc(6px + env(safe-area-inset-top,0px)) 8px 6px; min-height:48px; border-bottom:.5px solid transparent}
+  .bar .spacer{flex:1}
+  .tools{display:flex; align-items:center; gap:2px}
+  .back{display:none; align-items:center; gap:2px; color:var(--accent); font-size:17px; padding:6px 8px 6px 4px; border-radius:8px}
+  .back svg{width:12px; height:20px}
+  .ibtn{width:40px; height:36px; display:grid; place-items:center; color:var(--accent); border-radius:9px}
+  .ibtn:hover{background:var(--hover)}
+  .ibtn.on{background:var(--accent-soft)}
+  .ibtn.aa{font-size:18px; font-weight:600; letter-spacing:-.02em}
+  .scroll{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch}
+  .page{max-width:700px; margin:0 auto; padding:0 24px calc(40vh + env(safe-area-inset-bottom,0px))}
+  .meta{margin:4px 0 16px; text-align:center; font-size:12px; color:var(--text3); font-variant-numeric:tabular-nums; min-height:1em}
+  .meta b{font-weight:600; color:var(--text2)}
+  .editor{outline:none; font-size:17px; line-height:1.45; position:relative; caret-color:var(--accent); word-break:break-word; overflow-wrap:anywhere; -webkit-user-select:text; user-select:text}
+  .editor ::selection{background:var(--sel)}
+  .blk{position:relative; min-height:1.45em; padding:1px 0}
+  .t-title{font-size:26px; font-weight:700; line-height:1.25; letter-spacing:-.01em; padding:2px 0 6px}
+  .t-heading{font-size:19px; font-weight:700; line-height:1.3; padding:10px 0 2px}
+  .t-bullet{padding-left:34px}
+  .t-bullet::before{content:""; position:absolute; left:13px; top:.62em; width:6px; height:6px; border-radius:50%; background:currentColor}
+  .t-check{padding-left:34px}
+  .t-check::before{
+    content:""; position:absolute; left:0; top:2px; width:22px; height:22px; border-radius:50%;
+    border:1.5px solid var(--text3); cursor:pointer; transition:background .12s, border-color .12s, transform .12s;
+  }
+  .t-check:hover::before{border-color:var(--accent)}
+  .t-check[data-done]::before{background:var(--accent); border-color:var(--accent)}
+  .t-check[data-done]::after{
+    content:""; position:absolute; left:8px; top:6.5px; width:5.5px; height:10px; border:solid var(--check-fg); border-width:0 2px 2px 0; transform:rotate(45deg); pointer-events:none;
+  }
+  .t-check[data-done]{color:var(--text3)}
+  .editor b{font-weight:700} .editor s{text-decoration:line-through}
+  .editor[data-empty]::before{position:absolute; left:0; top:0; color:var(--text3); pointer-events:none}
+  .editor[data-empty="title"]::before{content:"Title"; font-size:26px; font-weight:700; line-height:1.25; top:3px}
+  .editor[data-empty="heading"]::before{content:"Heading"; font-size:19px; font-weight:700; top:11px}
+  .editor[data-empty="body"]::before{content:"Start typing…"; top:1px}
+  .editor[data-empty="check"]::before,.editor[data-empty="bullet"]::before{content:"List item"; left:34px; top:1px}
+
+  .empty{position:absolute; inset:48px 0 0; display:grid; place-items:center; text-align:center; color:var(--text3); padding:24px}
+  .empty h2{font-size:22px; font-weight:600; margin:0 0 6px; color:var(--text2)}
+  .empty p{margin:0 0 18px; font-size:15px}
+  .empty button{color:var(--accent); font-size:17px; font-weight:500; padding:8px 14px; border-radius:10px}
+  .empty button:hover{background:var(--hover)}
+
+  /* ---------- popovers ---------- */
+  .pop{position:absolute; z-index:20; background:var(--pop); border-radius:14px; box-shadow:var(--shadow); padding:6px; min-width:220px; max-width:calc(100vw - 24px)}
+  .pop[hidden]{display:none}
+  .pop .sect{display:flex; flex-direction:column}
+  .pop .item{display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:9px 12px; border-radius:9px; font-size:16px}
+  .pop .item:hover{background:var(--hover)}
+  .pop .item[aria-pressed="true"]{background:var(--accent-soft)}
+  .pop .item .k{margin-left:auto; color:var(--text3); font-size:12px; font-variant-numeric:tabular-nums}
+  .pop .item.danger{color:var(--danger)}
+  .pop .item svg{flex:none; color:var(--text2)}
+  .pop hr{border:0; border-top:.5px solid var(--line); margin:6px 8px}
+  .pop .inline{display:grid; grid-template-columns:repeat(4,1fr); gap:4px; padding:2px 4px}
+  .pop .inline button{height:38px; border-radius:9px; font-size:17px; background:var(--field)}
+  .pop .inline button[aria-pressed="true"]{background:var(--accent); color:var(--check-fg)}
+  .pop .inline .b{font-weight:700} .pop .inline .i{font-style:italic} .pop .inline .u{text-decoration:underline} .pop .inline .s{text-decoration:line-through}
+  .pop .item.tt{font-size:20px; font-weight:700} .pop .item.th{font-size:17px; font-weight:700}
+
+  /* ---------- toast ---------- */
+  .toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); z-index:30; background:var(--toast); color:var(--toast-fg); padding:11px 12px 11px 16px; border-radius:12px; display:flex; align-items:center; gap:14px; font-size:15px; box-shadow:0 8px 30px rgba(0,0,0,.25); max-width:calc(100vw - 32px)}
+  .toast[hidden]{display:none}
+  .toast button{color:var(--accent); font-weight:600; padding:4px 6px; border-radius:6px}
+  .toast button[hidden]{display:none}
+
+  /* ---------- phone ---------- */
+  @media (max-width:719px){
+    .side{width:100%; border-right:0}
+    .main{position:absolute; inset:0; transform:translateX(100%); transition:transform .28s cubic-bezier(.2,.8,.2,1); box-shadow:-8px 0 30px rgba(0,0,0,.08); visibility:hidden}
+    .app.show-note .main{transform:none; visibility:visible}
+    .back{display:flex}
+    .side-head h1{font-size:32px}
+    .page{padding-left:20px; padding-right:20px}
+    .t-title{font-size:24px}
+    .empty{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important} }
+  @media print{ .side,.bar,.toast,.pop{display:none !important} .app{position:static} .page{padding-bottom:0} }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="side" id="side">
+    <header class="side-head">
+      <h1>Notes</h1>
+      <button class="ibtn" id="newBtn" aria-label="New note" title="New note">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4H6.5A2.5 2.5 0 0 0 4 6.5v11A2.5 2.5 0 0 0 6.5 20h11a2.5 2.5 0 0 0 2.5-2.5V12"/><path d="M18.4 3.6a1.9 1.9 0 0 1 2.7 2.7L13 14.4 9 15l.6-4z"/></svg>
+      </button>
+    </header>
+    <div class="search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/></svg>
+      <input id="search" type="search" placeholder="Search" aria-label="Search notes" autocomplete="off" autocapitalize="off">
+      <button class="search-clear" id="searchClear" aria-label="Clear search" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="var(--bg2)" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="list" id="list" role="listbox" aria-label="Notes"></div>
+    <div class="side-foot" id="count"></div>
+  </aside>
+
+  <main class="main" id="main">
+    <header class="bar">
+      <button class="back" id="backBtn" aria-label="Back to notes">
+        <svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2L2 10l8 8"/></svg>
+        Notes
+      </button>
+      <div class="spacer"></div>
+      <div class="tools" id="tools">
+        <button class="ibtn aa" id="fmtBtn" aria-label="Text styles" aria-haspopup="menu" aria-expanded="false" title="Text styles">Aa</button>
+        <button class="ibtn" id="checkBtn" aria-label="Checklist" title="Checklist (⌘⇧L)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="12" r="4.5"/><path d="M5 12l1.5 1.5L9 10.5"/><path d="M15 8.5h5M15 12h5M15 15.5h5"/></svg>
+        </button>
+        <button class="ibtn" id="trashBtn" aria-label="Delete note" title="Delete note">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l.8 12.2A1.5 1.5 0 0 0 8.8 20.6h6.4a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>
+        <button class="ibtn" id="moreBtn" aria-label="More" aria-haspopup="menu" aria-expanded="false" title="More">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="7.5" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1.1" fill="currentColor" stroke="none"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="scroll" id="scroll">
+      <div class="page">
+        <p class="meta" id="meta"></p>
+        <div class="editor" id="editor" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="Note text" enterkeyhint="enter"></div>
+      </div>
+    </div>
+    <div class="empty" id="empty" hidden>
+      <div>
+        <h2 id="emptyTitle">No Note Selected</h2>
+        <p id="emptyText">Pick a note on the left, or start a new one.</p>
+        <button id="emptyNew">New Note</button>
+      </div>
+    </div>
+
+    <div class="pop" id="fmtPop" hidden role="menu" aria-label="Text styles">
+      <div class="sect">
+        <button class="item tt" data-type="title" role="menuitemradio" aria-pressed="false">Title<span class="k">⌘⇧T</span></button>
+        <button class="item th" data-type="heading" role="menuitemradio" aria-pressed="false">Heading<span class="k">⌘⇧H</span></button>
+        <button class="item" data-type="body" role="menuitemradio" aria-pressed="false">Body<span class="k">⌘⇧B</span></button>
+      </div>
+      <hr>
+      <div class="inline" role="group" aria-label="Inline styles">
+        <button class="b" data-cmd="bold" aria-label="Bold" title="Bold (⌘B)" aria-pressed="false">B</button>
+        <button class="i" data-cmd="italic" aria-label="Italic" title="Italic (⌘I)" aria-pressed="false">I</button>
+        <button class="u" data-cmd="underline" aria-label="Underline" title="Underline (⌘U)" aria-pressed="false">U</button>
+        <button class="s" data-cmd="strikeThrough" aria-label="Strikethrough" title="Strikethrough" aria-pressed="false">S</button>
+      </div>
+      <hr>
+      <div class="sect">
+        <button class="item" data-type="bullet" role="menuitemradio" aria-pressed="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="7" r="1.4" fill="currentColor" stroke="none"/><circle cx="5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="5" cy="17" r="1.4" fill="currentColor" stroke="none"/><path d="M10 7h9M10 12h9M10 17h9"/></svg>
+          Bulleted List<span class="k">⌘⇧7</span>
+        </button>
+        <button class="item" data-type="check" role="menuitemradio" aria-pressed="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="12" r="4.5"/><path d="M5 12l1.5 1.5L9 10.5"/><path d="M15 8.5h5M15 12h5M15 15.5h5"/></svg>
+          Checklist<span class="k">⌘⇧L</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="pop" id="morePop" hidden role="menu" aria-label="Note actions">
+      <div class="sect">
+        <button class="item" id="actUncheck" role="menuitem">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8"/></svg>
+          Uncheck All
+        </button>
+        <button class="item" id="actSort" role="menuitem">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M7 14l5 5 5-5"/></svg>
+          Move Checked to Bottom
+        </button>
+        <button class="item" id="actClear" role="menuitem">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M8.5 12h7"/></svg>
+          Delete Checked Items
+        </button>
+      </div>
+      <hr>
+      <div class="sect">
+        <button class="item" id="actCopy" role="menuitem">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+          Copy as Text
+        </button>
+        <button class="item" id="actDup" role="menuitem">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4H6.5A2.5 2.5 0 0 0 4 6.5v11A2.5 2.5 0 0 0 6.5 20h11a2.5 2.5 0 0 0 2.5-2.5V12"/><path d="M15 4h5v5M20 4l-8 8"/></svg>
+          Duplicate Note
+        </button>
+      </div>
+      <hr>
+      <div class="sect">
+        <button class="item danger" id="actDelete" role="menuitem">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:inherit"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l.8 12.2A1.5 1.5 0 0 0 8.8 20.6h6.4a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/></svg>
+          Delete Note
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" hidden role="status" aria-live="polite">
+    <span id="toastMsg"></span>
+    <button id="toastAct" hidden>Undo</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const app = $('app'), editor = $('editor'), list = $('list'), search = $('search'), meta = $('meta');
+  const fmtPop = $('fmtPop'), morePop = $('morePop'), toast = $('toast');
+  const KEY = 'notes.checklist.v1';
+  const TYPES = ['title', 'heading', 'body', 'bullet', 'check'];
+  const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform) || /Mac/.test(navigator.userAgent);
+  const phone = matchMedia('(max-width:719px)');
+  document.querySelectorAll('.k').forEach(k => { if (!isMac) k.textContent = k.textContent.replace('⌘', 'Ctrl+').replace('⇧', 'Shift+'); });
+
+  /* ---------------- state ---------------- */
+  let state = { notes: [], activeId: null };
+  let active = null, saveTimer = null, listTimer = null, toastTimer = null;
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  function load() {
+    try { const raw = localStorage.getItem(KEY); if (raw) { const d = JSON.parse(raw); if (d && Array.isArray(d.notes)) state = d; } } catch (e) {}
+  }
+  function persist() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  const welcome = () => ({
+    id: uid(), created: Date.now(), updated: Date.now(),
+    html: '<div class="blk t-title">Welcome to Notes</div>'
+      + '<div class="blk t-body">A simple place for lists and thoughts. Everything saves automatically in this browser.</div>'
+      + '<div class="blk t-heading">Try it</div>'
+      + '<div class="blk t-check" data-done="">Tap a circle to check it off</div>'
+      + '<div class="blk t-check">Press Enter at the end of an item for a new one</div>'
+      + '<div class="blk t-check">Press Enter on an empty item to end the list</div>'
+      + '<div class="blk t-check">Type <b>[]</b> and a space to start a checklist anywhere</div>'
+      + '<div class="blk t-check">Type <b>-</b> and a space for bullets, <b>#</b> for a title</div>'
+      + '<div class="blk t-check">Use <b>Aa</b> for styles, or ' + (isMac ? '⌘B' : 'Ctrl+B') + ' and friends</div>'
+      + '<div class="blk t-body">The ··· menu can uncheck everything, tidy checked items to the bottom, or copy the note as plain text.</div>'
+  });
+
+  /* ---------------- DOM helpers ---------------- */
+  const makeBlock = type => { const d = document.createElement('div'); d.className = 'blk t-' + type; d.appendChild(document.createElement('br')); return d; };
+  const typeOf = b => TYPES.find(t => b.classList.contains('t-' + t)) || 'body';
+  const isEmpty = b => b.textContent.replace(/[\u200b\ufeff]/g, '').length === 0;
+  function setType(b, type) { b.className = 'blk t-' + type; if (type !== 'check') b.removeAttribute('data-done'); }
+  function blockOf(node) {
+    if (!node) return null;
+    const el = node.nodeType === 1 ? node : node.parentNode;
+    const b = el && el.closest ? el.closest('.blk') : null;
+    return b && editor.contains(b) ? b : null;
+  }
+  function currentRange() { const s = getSelection(); return s.rangeCount && editor.contains(s.anchorNode) ? s.getRangeAt(0) : null; }
+  function currentBlock() { const r = currentRange(); return r ? blockOf(r.startContainer) : null; }
+  function selectedBlocks() {
+    const r = currentRange(); if (!r) return [];
+    return [...editor.children].filter(b => r.intersectsNode(b));
+  }
+  function placeCaret(b, atStart) {
+    const r = document.createRange();
+    if (atStart) { r.setStart(b, 0); }
+    else { const last = b.lastChild; if (last && last.nodeName === 'BR') r.setStartBefore(last); else { r.selectNodeContents(b); r.collapse(false); } }
+    r.collapse(true);
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+  function textBefore(b, r) { const p = document.createRange(); p.selectNodeContents(b); p.setEnd(r.startContainer, r.startOffset); return p.toString(); }
+  function textAfter(b, r) { const p = document.createRange(); p.selectNodeContents(b); p.setStart(r.endContainer, r.endOffset); return p.toString(); }
+  function ensureBr(b) { if (isEmpty(b) && !b.querySelector('br')) b.appendChild(document.createElement('br')); }
+  function stripLoneBr(b) { if (isEmpty(b)) b.textContent = ''; }
+  function deleteLeading(b, n) {
+    const walker = document.createTreeWalker(b, NodeFilter.SHOW_TEXT); let node, rem = n;
+    const r = document.createRange(); r.setStart(b, 0);
+    while ((node = walker.nextNode())) { if (node.length >= rem) { r.setEnd(node, rem); r.deleteContents(); return; } rem -= node.length; }
+  }
+
+  /* ---------------- sanitize / normalize ---------------- */
+  const INLINE = { B: 'b', STRONG: 'b', I: 'i', EM: 'i', U: 'u', S: 's', STRIKE: 's', DEL: 's', BR: 'br' };
+  function sanitizeInline(node) {
+    for (const c of [...node.childNodes]) {
+      if (c.nodeType === 3) continue;
+      if (c.nodeType !== 1) { c.remove(); continue; }
+      const tag = INLINE[c.tagName];
+      if (tag) {
+        if (c.attributes.length === 0 && c.tagName.toLowerCase() === tag) { sanitizeInline(c); continue; }
+        const el = document.createElement(tag);
+        if (tag !== 'br') { while (c.firstChild) el.appendChild(c.firstChild); sanitizeInline(el); }
+        c.replaceWith(el);
+      } else {
+        if (c.tagName === 'DIV' || c.tagName === 'P' || c.tagName === 'LI') c.after(document.createElement('br'));
+        sanitizeInline(c);
+        const f = document.createDocumentFragment(); while (c.firstChild) f.appendChild(c.firstChild); c.replaceWith(f);
+      }
+    }
+  }
+  function sanitizeHTML(html) {
+    const t = document.createElement('template'); t.innerHTML = html;
+    const out = document.createDocumentFragment(); let run = null;
+    for (const n of [...t.content.childNodes]) {
+      if (n.nodeType === 1 && n.tagName === 'DIV') {
+        run = null;
+        const type = TYPES.find(x => n.classList.contains('t-' + x)) || 'body';
+        const b = makeBlock(type); b.textContent = '';
+        if (type === 'check' && n.hasAttribute('data-done')) b.setAttribute('data-done', '');
+        while (n.firstChild) b.appendChild(n.firstChild);
+        sanitizeInline(b); ensureBr(b); out.appendChild(b);
+      } else {
+        if (!run) { run = makeBlock('body'); run.textContent = ''; out.appendChild(run); }
+        run.appendChild(n);
+      }
+    }
+    for (const b of out.childNodes) { sanitizeInline(b); ensureBr(b); }
+    if (!out.firstChild) out.appendChild(makeBlock('title'));
+    return out;
+  }
+  function normalize() {
+    let run = null;
+    for (const n of [...editor.childNodes]) {
+      if (n.nodeType === 1 && n.tagName === 'DIV') {
+        run = null;
+        if (!n.classList.contains('blk')) n.className = 'blk t-body';
+        n.querySelectorAll('div,p').forEach(d => { const f = document.createDocumentFragment(); while (d.firstChild) f.appendChild(d.firstChild); d.replaceWith(f); });
+        if (n.querySelector(':not(b):not(i):not(u):not(s):not(br)')) sanitizeInline(n);
+        if (!n.classList.contains('t-check')) n.removeAttribute('data-done');
+        ensureBr(n);
+      } else {
+        if (n.nodeType === 3 && n.textContent === '') { n.remove(); continue; }
+        if (n.nodeType === 1 && n.tagName === 'BR' && !run) { n.remove(); continue; }
+        if (!run) { run = makeBlock('body'); run.textContent = ''; editor.insertBefore(run, n); }
+        run.appendChild(n);
+      }
+    }
+    if (run) ensureBr(run);
+    if (!editor.firstChild) editor.appendChild(makeBlock('title'));
+    if (document.activeElement === editor && !currentBlock()) placeCaret(editor.firstChild, true);
+    updateEmpty();
+  }
+  function updateEmpty() {
+    const first = editor.firstElementChild;
+    if (first && editor.children.length === 1 && isEmpty(first)) editor.setAttribute('data-empty', typeOf(first));
+    else editor.removeAttribute('data-empty');
+  }
+
+  /* ---------------- history (undo / redo) ---------------- */
+  let hist = [], hi = -1, lastPush = 0, lastKind = '';
+  function caretPos() {
+    const r = currentRange(); if (!r) return null;
+    const b = blockOf(r.startContainer); if (!b) return null;
+    return { i: [...editor.children].indexOf(b), o: textBefore(b, r).length };
+  }
+  function restoreCaret(c) {
+    if (!c) return;
+    const b = editor.children[Math.min(c.i, editor.children.length - 1)]; if (!b) return;
+    const walker = document.createTreeWalker(b, NodeFilter.SHOW_TEXT); let node, rem = c.o;
+    while ((node = walker.nextNode())) {
+      if (node.length >= rem) { const r = document.createRange(); r.setStart(node, rem); r.collapse(true); const s = getSelection(); s.removeAllRanges(); s.addRange(r); return; }
+      rem -= node.length;
+    }
+    placeCaret(b, false);
+  }
+  function resetHistory() { hist = [{ html: editor.innerHTML, caret: null }]; hi = 0; lastKind = ''; }
+  function pushHistory(kind) {
+    const now = Date.now(), snap = { html: editor.innerHTML, caret: caretPos() };
+    if (hist[hi] && hist[hi].html === snap.html) { hist[hi].caret = snap.caret; return; }
+    const merge = kind && kind === lastKind && now - lastPush < 700 && hi > 0;
+    if (merge) hist[hi] = snap; else { hist = hist.slice(0, hi + 1); hist.push(snap); hi = hist.length - 1; if (hist.length > 200) { hist.shift(); hi--; } }
+    lastPush = now; lastKind = kind || '';
+  }
+  function undo() { if (hi <= 0) return; hi--; applySnap(hist[hi]); }
+  function redo() { if (hi >= hist.length - 1) return; hi++; applySnap(hist[hi]); }
+  function applySnap(s) { editor.innerHTML = s.html; normalize(); restoreCaret(s.caret); lastKind = ''; commit(); }
+
+  /* ---------------- notes CRUD ---------------- */
+  const sorted = () => [...state.notes].sort((a, b) => b.updated - a.updated);
+  const textOf = html => { const t = document.createElement('template'); t.innerHTML = html; return [...t.content.children].map(b => b.textContent.trim()); };
+  function titleOf(n) { const lines = textOf(n.html).filter(Boolean); return lines[0] || 'New Note'; }
+  function previewOf(n) { const lines = textOf(n.html).filter(Boolean); return lines[1] || 'No additional text'; }
+  function progressOf(n) { const t = document.createElement('template'); t.innerHTML = n.html; const all = t.content.querySelectorAll('.t-check').length; const done = t.content.querySelectorAll('.t-check[data-done]').length; return { all, done }; }
+
+  function openNote(n, focus) {
+    flush();
+    active = n; state.activeId = n ? n.id : null; persist();
+    if (n) {
+      editor.textContent = ''; editor.appendChild(sanitizeHTML(n.html)); normalize(); resetHistory();
+      $('empty').hidden = true; $('scroll').hidden = false; $('tools').hidden = false;
+      renderMeta(); $('scroll').scrollTop = 0;
+      if (focus) { editor.focus(); placeCaret(editor.firstChild, false); }
+    } else {
+      editor.textContent = ''; resetHistory();
+      $('scroll').hidden = true; $('tools').hidden = true; $('empty').hidden = false;
+      const any = state.notes.length > 0;
+      $('emptyTitle').textContent = any ? 'No Note Selected' : 'No Notes';
+      $('emptyText').textContent = any ? 'Pick a note on the left, or start a new one.' : 'Your notes live in this browser. Start with one.';
+    }
+    renderList();
+  }
+  function newNote(html) {
+    const n = { id: uid(), created: Date.now(), updated: Date.now(), html: html || '<div class="blk t-title"><br></div>' };
+    state.notes.push(n); persist();
+    openNote(n, true);
+    if (phone.matches) showNote(true);
+  }
+  function deleteNote(n) {
+    if (!n) return;
+    const order = sorted(), idx = order.findIndex(x => x.id === n.id);
+    state.notes = state.notes.filter(x => x.id !== n.id);
+    const next = order[idx + 1] || order[idx - 1] || null;
+    openNote(next && next.id !== n.id ? next : null, false);
+    if (phone.matches && !next) showNote(false);
+    showToast('Note deleted', 'Undo', () => { if (state.notes.some(x => x.id === n.id)) return; state.notes.push(n); openNote(n, false); if (phone.matches) showNote(true); });
+  }
+  function commit() {
+    if (!active) return;
+    normalize();
+    const html = editor.innerHTML;
+    if (html !== active.html) { active.html = html; active.updated = Date.now(); persist(); renderListSoon(); }
+    renderMeta();
+  }
+  function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(commit, 250); }
+  function flush() { clearTimeout(saveTimer); if (active) commit(); }
+
+  /* ---------------- rendering ---------------- */
+  const fmtTime = ts => new Date(ts).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  function dayDiff(ts) { const d = new Date(ts), n = new Date(); d.setHours(0, 0, 0, 0); n.setHours(0, 0, 0, 0); return Math.round((n - d) / 864e5); }
+  function fmtListDate(ts) {
+    const dd = dayDiff(ts);
+    if (dd <= 0) return fmtTime(ts);
+    if (dd === 1) return 'Yesterday';
+    if (dd < 7) return new Date(ts).toLocaleDateString(undefined, { weekday: 'long' });
+    return new Date(ts).toLocaleDateString(undefined, { year: '2-digit', month: 'numeric', day: 'numeric' });
+  }
+  function groupOf(ts) { const dd = dayDiff(ts); if (dd <= 0) return 'Today'; if (dd === 1) return 'Yesterday'; if (dd < 7) return 'Previous 7 Days'; if (dd < 30) return 'Previous 30 Days'; return new Date(ts).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }); }
+  function renderMeta() {
+    if (!active) return;
+    const d = new Date(active.updated);
+    let s = d.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) + ' at ' + fmtTime(active.updated);
+    const all = editor.querySelectorAll('.t-check').length, done = editor.querySelectorAll('.t-check[data-done]').length;
+    meta.textContent = s;
+    if (all) { const b = document.createElement('b'); b.textContent = (done === all ? 'All ' + all + ' done' : done + ' of ' + all + ' done'); meta.append('  ·  ', b); }
+  }
+  function renderListSoon() { clearTimeout(listTimer); listTimer = setTimeout(renderList, 200); }
+  function renderList() {
+    const q = search.value.trim().toLowerCase();
+    $('searchClear').hidden = !q;
+    const notes = sorted().filter(n => !q || textOf(n.html).join('\n').toLowerCase().includes(q));
+    list.textContent = '';
+    if (!notes.length) { const p = document.createElement('p'); p.className = 'nores'; p.textContent = q ? 'No Results' : 'No notes yet'; list.appendChild(p); }
+    let group = null, rows = null;
+    for (const n of notes) {
+      const g = groupOf(n.updated);
+      if (g !== group) { group = g; const gd = document.createElement('div'); gd.className = 'group'; const h = document.createElement('h2'); h.textContent = g; gd.appendChild(h); rows = document.createElement('div'); rows.className = 'rows'; gd.appendChild(rows); list.appendChild(gd); }
+      const row = document.createElement('button'); row.className = 'row'; row.setAttribute('role', 'option'); row.dataset.id = n.id;
+      row.setAttribute('aria-selected', active && active.id === n.id ? 'true' : 'false');
+      const t = document.createElement('div'); t.className = 't'; t.textContent = titleOf(n);
+      const s = document.createElement('div'); s.className = 's';
+      const d = document.createElement('span'); d.className = 'd'; d.textContent = fmtListDate(n.updated);
+      const p = document.createElement('span'); p.className = 'p'; p.textContent = previewOf(n);
+      s.append(d, p);
+      const pr = progressOf(n); if (pr.all) { const c = document.createElement('span'); c.className = 'n'; c.textContent = pr.done + '/' + pr.all; s.appendChild(c); }
+      row.append(t, s); rows.appendChild(row);
+    }
+    const total = state.notes.length; $('count').textContent = total === 1 ? '1 Note' : total + ' Notes';
+  }
+  function showNote(on) { app.classList.toggle('show-note', !!on); if (!on) { closePops(); editor.blur(); } }
+
+  /* ---------------- editing commands ---------------- */
+  function applyType(type) {
+    const blocks = selectedBlocks(); if (!blocks.length) return;
+    const allSame = blocks.every(b => typeOf(b) === type);
+    const target = allSame && (type === 'check' || type === 'bullet') ? 'body' : type;
+    blocks.forEach(b => setType(b, target));
+    pushHistory(); commit(); updateFmtState();
+  }
+  function toggleDone(b) { if (b.hasAttribute('data-done')) b.removeAttribute('data-done'); else b.setAttribute('data-done', ''); pushHistory(); commit(); }
+  function splitBlock(keepType) {
+    const s = getSelection(); if (!s.rangeCount) return null;
+    if (!s.isCollapsed) document.execCommand('delete');
+    const r = s.getRangeAt(0); const b = blockOf(r.startContainer); if (!b) return null;
+    const type = typeOf(b);
+    const atStart = textBefore(b, r).length === 0 && !isEmpty(b);
+    if (atStart) { const nb = makeBlock(type); b.before(nb); placeCaret(b, true); return b; }
+    const tail = document.createRange(); tail.setStart(r.startContainer, r.startOffset); tail.setEndAfter(b.lastChild);
+    const frag = tail.extractContents();
+    const nt = keepType ? type : ((type === 'title' || type === 'heading') && frag.textContent.length === 0 ? 'body' : type);
+    const nb = makeBlock(nt); nb.textContent = ''; nb.appendChild(frag);
+    stripLoneBr(nb); ensureBr(nb); ensureBr(b);
+    b.after(nb); placeCaret(nb, true);
+    return nb;
+  }
+  function onEnter(e) {
+    e.preventDefault();
+    const b = currentBlock(); if (!b) return;
+    const type = typeOf(b);
+    if ((type === 'check' || type === 'bullet') && isEmpty(b) && getSelection().isCollapsed) { setType(b, 'body'); pushHistory(); commit(); return; }
+    const nb = splitBlock(false);
+    if (nb) { nb.scrollIntoView({ block: 'nearest' }); }
+    pushHistory(); commit();
+  }
+  function onBackspace(e) {
+    const s = getSelection(); if (!s.isCollapsed) return;
+    const r = currentRange(); const b = r && blockOf(r.startContainer); if (!b) return;
+    if (textBefore(b, r).length !== 0) return;
+    e.preventDefault();
+    const type = typeOf(b);
+    if (type === 'check' || type === 'bullet') { setType(b, 'body'); pushHistory(); commit(); return; }
+    const prev = b.previousElementSibling; if (!prev) { if (type !== 'body' && isEmpty(b)) { setType(b, 'body'); pushHistory(); commit(); } return; }
+    mergeInto(prev, b); pushHistory(); commit();
+  }
+  function onDelete(e) {
+    const s = getSelection(); if (!s.isCollapsed) return;
+    const r = currentRange(); const b = r && blockOf(r.startContainer); if (!b) return;
+    if (textAfter(b, r).length !== 0) return;
+    const next = b.nextElementSibling; if (!next) { e.preventDefault(); return; }
+    e.preventDefault(); mergeInto(b, next, true); pushHistory(); commit();
+  }
+  function mergeInto(a, b, keepCaret) {
+    const c = keepCaret ? caretPos() : null;
+    if (isEmpty(a)) { a.textContent = ''; }
+    else { const last = a.lastChild; if (last && last.nodeName === 'BR') last.remove(); }
+    const marker = document.createTextNode('');
+    a.appendChild(marker);
+    if (!isEmpty(b)) { while (b.firstChild) a.appendChild(b.firstChild); }
+    b.remove(); ensureBr(a);
+    if (keepCaret) restoreCaret(c);
+    else { const r = document.createRange(); r.setStartAfter(marker); r.collapse(true); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+    marker.remove();
+  }
+  function shortcut(b, r) {
+    const before = textBefore(b, r);
+    const m = /^(\[\s?\]|\[x\]|-|\*|#|##)[ \u00a0]$/i.exec(before); if (!m) return false;
+    const tok = m[1].toLowerCase();
+    const type = tok === '-' || tok === '*' ? 'bullet' : tok === '#' ? 'title' : tok === '##' ? 'heading' : 'check';
+    deleteLeading(b, before.length); setType(b, type);
+    if (tok === '[x]') b.setAttribute('data-done', '');
+    ensureBr(b); placeCaret(b, true); return true;
+  }
+  function insertParagraphs(lines) {
+    document.execCommand('insertText', false, lines[0]);
+    for (let i = 1; i < lines.length; i++) {
+      const nb = splitBlock(true); if (!nb) break;
+      let line = lines[i];
+      const m = /^(\[( |x)?\]|- \[( |x)\]|[-*•]|☐|☑|✓)\s+/i.exec(line);
+      if (m) {
+        const tok = m[1].toLowerCase();
+        const done = /x|☑|✓/.test(tok);
+        setType(nb, /[-*•]/.test(tok) && !/\[/.test(tok) ? 'bullet' : 'check');
+        if (done && typeOf(nb) === 'check') nb.setAttribute('data-done', '');
+        line = line.slice(m[0].length);
+      } else if (typeOf(nb) !== 'body' && typeOf(nb) !== 'check' && typeOf(nb) !== 'bullet') setType(nb, 'body');
+      if (line) document.execCommand('insertText', false, line);
+    }
+  }
+  function noteAsText() {
+    return [...editor.children].map(b => {
+      const t = b.textContent.replace(/\u200b/g, '').trimEnd(), ty = typeOf(b);
+      if (ty === 'check') return (b.hasAttribute('data-done') ? '☑ ' : '☐ ') + t;
+      if (ty === 'bullet') return '• ' + t;
+      return t;
+    }).join('\n').trim() + '\n';
+  }
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); return true; }
+    catch (e) { const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (x) {} ta.remove(); return ok; }
+  }
+
+  /* ---------------- popovers & toast ---------------- */
+  function openPop(pop, btn) {
+    const other = pop === fmtPop ? morePop : fmtPop; other.hidden = true; (pop === fmtPop ? $('moreBtn') : $('fmtBtn')).setAttribute('aria-expanded', 'false');
+    const open = pop.hidden; closePops(); if (!open) return;
+    pop.hidden = false; btn.setAttribute('aria-expanded', 'true'); btn.classList.add('on');
+    const mr = $('main').getBoundingClientRect(), br = btn.getBoundingClientRect();
+    pop.style.top = (br.bottom - mr.top + 6) + 'px';
+    pop.style.right = Math.max(8, mr.right - br.right) + 'px';
+    pop.style.left = 'auto';
+    if (pop === fmtPop) updateFmtState();
+  }
+  function closePops() {
+    fmtPop.hidden = morePop.hidden = true;
+    ['fmtBtn', 'moreBtn'].forEach(id => { $(id).setAttribute('aria-expanded', 'false'); $(id).classList.remove('on'); });
+  }
+  function updateFmtState() {
+    if (fmtPop.hidden) return;
+    const b = currentBlock(); const t = b ? typeOf(b) : '';
+    fmtPop.querySelectorAll('[data-type]').forEach(el => el.setAttribute('aria-pressed', String(el.dataset.type === t)));
+    fmtPop.querySelectorAll('[data-cmd]').forEach(el => { let on = false; try { on = document.queryCommandState(el.dataset.cmd); } catch (e) {} el.setAttribute('aria-pressed', String(on)); });
+  }
+  function showToast(msg, actLabel, act) {
+    clearTimeout(toastTimer);
+    $('toastMsg').textContent = msg;
+    const btn = $('toastAct'); btn.hidden = !actLabel; btn.textContent = actLabel || '';
+    btn.onclick = () => { hideToast(); act && act(); };
+    toast.hidden = false;
+    toastTimer = setTimeout(hideToast, actLabel ? 7000 : 2200);
+  }
+  function hideToast() { toast.hidden = true; }
+
+  /* ---------------- events: editor ---------------- */
+  editor.addEventListener('keydown', e => {
+    if (e.isComposing) return;
+    const mod = isMac ? e.metaKey : e.ctrlKey;
+    if (mod && !e.altKey && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+    if (mod && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); return; }
+    if (mod && e.shiftKey && !e.altKey) {
+      const k = e.key.toLowerCase(), c = e.code;
+      const map = { l: 'check', t: 'title', h: 'heading', b: 'body' };
+      if (map[k]) { e.preventDefault(); applyType(map[k]); return; }
+      if (c === 'Digit7') { e.preventDefault(); applyType('bullet'); return; }
+      if (k === 'u') { e.preventDefault(); const b = currentBlock(); if (b && typeOf(b) === 'check') toggleDone(b); return; }
+    }
+    if (e.key === 'Enter' && !e.shiftKey && !e.altKey && !mod) { onEnter(e); return; }
+    if (e.key === 'Backspace' && !mod) { onBackspace(e); return; }
+    if (e.key === 'Delete' && !mod) { onDelete(e); return; }
+    if (e.key === 'Escape') { closePops(); if (phone.matches) { editor.blur(); } }
+  });
+  editor.addEventListener('beforeinput', e => {
+    if (e.inputType === 'historyUndo') { e.preventDefault(); undo(); }
+    else if (e.inputType === 'historyRedo') { e.preventDefault(); redo(); }
+    else if (e.inputType === 'insertParagraph') { onEnter(e); } /* virtual keyboards that skip keydown */
+  });
+  editor.addEventListener('input', e => {
+    if (e.isComposing) return;
+    normalize();
+    const kind = e.inputType || 'x';
+    if (kind === 'insertText' && (e.data === ' ' || e.data === '\u00a0')) { const r = currentRange(); const b = r && blockOf(r.startContainer); if (b && shortcut(b, r)) { pushHistory(); commit(); return; } }
+    pushHistory(/^(insertText|deleteContentBackward|deleteContentForward|insertCompositionText)$/.test(kind) ? kind : '');
+    scheduleSave();
+  });
+  editor.addEventListener('compositionend', () => { normalize(); pushHistory('insertText'); scheduleSave(); });
+  editor.addEventListener('paste', e => {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text/plain'); if (!text) return;
+    const lines = text.replace(/\r\n?/g, '\n').split('\n');
+    insertParagraphs(lines); normalize(); pushHistory(); commit();
+  });
+  editor.addEventListener('drop', e => e.preventDefault());
+  editor.addEventListener('pointerdown', e => {
+    const b = e.target.closest && e.target.closest('.blk'); if (!b || !b.classList.contains('t-check')) return;
+    const r = b.getBoundingClientRect();
+    if (e.clientX - r.left > 34 || e.clientY - r.top > 30) return;
+    e.preventDefault(); toggleDone(b);
+  });
+  editor.addEventListener('blur', flush);
+  document.addEventListener('selectionchange', () => { if (!fmtPop.hidden) updateFmtState(); });
+
+  /* ---------------- events: chrome ---------------- */
+  const keepSel = el => el.addEventListener('mousedown', e => e.preventDefault());
+  ['fmtBtn', 'checkBtn', 'trashBtn', 'moreBtn'].forEach(id => keepSel($(id)));
+  fmtPop.querySelectorAll('button').forEach(keepSel); morePop.querySelectorAll('button').forEach(keepSel);
+
+  $('fmtBtn').addEventListener('click', () => openPop(fmtPop, $('fmtBtn')));
+  $('moreBtn').addEventListener('click', () => openPop(morePop, $('moreBtn')));
+  $('checkBtn').addEventListener('click', () => { if (!currentBlock()) { editor.focus(); placeCaret(editor.lastElementChild, false); } applyType('check'); });
+  $('trashBtn').addEventListener('click', () => deleteNote(active));
+  $('actDelete').addEventListener('click', () => { closePops(); deleteNote(active); });
+  fmtPop.querySelectorAll('[data-type]').forEach(el => el.addEventListener('click', () => { if (!currentBlock()) { editor.focus(); placeCaret(editor.lastElementChild, false); } applyType(el.dataset.type); }));
+  fmtPop.querySelectorAll('[data-cmd]').forEach(el => el.addEventListener('click', () => { if (!currentRange()) editor.focus(); document.execCommand(el.dataset.cmd, false, null); normalize(); pushHistory(); commit(); updateFmtState(); }));
+  $('actUncheck').addEventListener('click', () => { closePops(); editor.querySelectorAll('.t-check[data-done]').forEach(b => b.removeAttribute('data-done')); pushHistory(); commit(); showToast('All items unchecked'); });
+  $('actSort').addEventListener('click', () => {
+    closePops();
+    const checks = [...editor.querySelectorAll('.t-check')]; if (!checks.length) return;
+    const done = checks.filter(b => b.hasAttribute('data-done')); const last = checks[checks.length - 1];
+    let anchor = last; done.forEach(b => { if (b === anchor) return; anchor.after(b); anchor = b; });
+    pushHistory(); commit(); showToast('Checked items moved to the bottom');
+  });
+  $('actClear').addEventListener('click', () => {
+    closePops();
+    const done = [...editor.querySelectorAll('.t-check[data-done]')]; if (!done.length) { showToast('Nothing is checked'); return; }
+    const snapshot = editor.innerHTML;
+    done.forEach(b => b.remove()); normalize(); pushHistory(); commit();
+    showToast(done.length + (done.length === 1 ? ' item deleted' : ' items deleted'), 'Undo', () => { editor.innerHTML = snapshot; normalize(); pushHistory(); commit(); });
+  });
+  $('actCopy').addEventListener('click', async () => { closePops(); showToast(await copyText(noteAsText()) ? 'Copied as text' : 'Could not copy'); });
+  $('actDup').addEventListener('click', () => { closePops(); flush(); newNote(active.html); showToast('Note duplicated'); });
+
+  $('newBtn').addEventListener('click', () => newNote());
+  $('emptyNew').addEventListener('click', () => newNote());
+  $('backBtn').addEventListener('click', () => { flush(); showNote(false); });
+  list.addEventListener('click', e => {
+    const row = e.target.closest('.row'); if (!row) return;
+    const n = state.notes.find(x => x.id === row.dataset.id); if (!n) return;
+    if (!active || active.id !== n.id) openNote(n, false); else renderList();
+    if (phone.matches) showNote(true);
+  });
+  list.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const rows = [...list.querySelectorAll('.row')]; const i = rows.indexOf(document.activeElement); if (i < 0) return;
+    e.preventDefault(); const next = rows[i + (e.key === 'ArrowDown' ? 1 : -1)]; if (next) { next.focus(); next.click(); }
+  });
+  search.addEventListener('input', renderList);
+  search.addEventListener('keydown', e => { if (e.key === 'Escape') { search.value = ''; renderList(); search.blur(); } });
+  $('searchClear').addEventListener('click', () => { search.value = ''; renderList(); search.focus(); });
+
+  document.addEventListener('pointerdown', e => {
+    if (fmtPop.hidden && morePop.hidden) return;
+    if (e.target.closest('.pop') || e.target.closest('#fmtBtn') || e.target.closest('#moreBtn')) return;
+    closePops();
+  });
+  document.addEventListener('keydown', e => {
+    const mod = isMac ? e.metaKey : e.ctrlKey;
+    if (e.key === 'Escape' && (!fmtPop.hidden || !morePop.hidden)) { closePops(); return; }
+    if (mod && e.altKey && e.key.toLowerCase() === 'n') { e.preventDefault(); newNote(); return; }
+    if (mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'f' && !phone.matches) { e.preventDefault(); search.focus(); search.select(); }
+  });
+  $('scroll').addEventListener('scroll', closePops, { passive: true });
+  window.addEventListener('resize', closePops);
+  window.addEventListener('beforeunload', flush);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
+  window.addEventListener('storage', e => {
+    if (e.key !== KEY) return;
+    load();
+    const n = active && state.notes.find(x => x.id === active.id);
+    if (!n) { openNote(state.notes.length ? sorted()[0] : null, false); return; }
+    active = n; if (document.activeElement !== editor && n.html !== editor.innerHTML) { editor.textContent = ''; editor.appendChild(sanitizeHTML(n.html)); normalize(); resetHistory(); }
+    renderMeta(); renderList();
+  });
+  setInterval(() => { renderList(); if (active) renderMeta(); }, 60000);
+
+  /* ---------------- boot ---------------- */
+  try { document.execCommand('styleWithCSS', false, false); } catch (e) {}
+  load();
+  let fresh = true; try { fresh = !localStorage.getItem(KEY); } catch (e) {}
+  if (!state.notes.length && fresh) { state.notes.push(welcome()); state.activeId = state.notes[0].id; persist(); }
+  const start = state.notes.find(n => n.id === state.activeId) || sorted()[0] || null;
+  openNote(start, false);
+})();
+</script>
+</body>
+</html>
