@@ -378,6 +378,7 @@
     for (const c of [...node.childNodes]) {
       if (c.nodeType === 3) continue;
       if (c.nodeType !== 1) { c.remove(); continue; }
+      if (c.id === '__caret') continue;
       const tag = INLINE[c.tagName];
       if (tag) {
         if (c.attributes.length === 0 && c.tagName.toLowerCase() === tag) { sanitizeInline(c); continue; }
@@ -411,14 +412,47 @@
     if (!out.firstChild) out.appendChild(makeBlock('title'));
     return out;
   }
+  /* Split a block that the browser filled with several lines (nested divs or <br>s) into real blocks. */
+  function collectLines(node, lines) {
+    for (const k of [...node.childNodes]) {
+      if (k.nodeName === 'BR') { if (k !== node.lastChild || node === editor) lines.push([]); continue; }
+      if (k.nodeName === 'DIV' || k.nodeName === 'P') {
+        if (lines[lines.length - 1].length) lines.push([]);
+        collectLines(k, lines);
+        if (k.nextSibling) lines.push([]);
+        continue;
+      }
+      if (k.nodeType === 1 && k.querySelector('br,div,p')) { collectLines(k, lines); continue; }
+      lines[lines.length - 1].push(k);
+    }
+  }
+  function splitLines(b) {
+    if (!b.querySelector('div,p,br:not(:last-child)')) return false;
+    const lines = [[]]; collectLines(b, lines);
+    if (lines.length < 2) return false;
+    const type = typeOf(b), next = (type === 'title' || type === 'heading') ? 'body' : type;
+    b.textContent = ''; lines[0].forEach(k => b.appendChild(k)); ensureBr(b);
+    let anchor = b;
+    for (let i = 1; i < lines.length; i++) { const nb = makeBlock(next); nb.textContent = ''; lines[i].forEach(k => nb.appendChild(k)); ensureBr(nb); anchor.after(nb); anchor = nb; }
+    return true;
+  }
   function normalize() {
+    const needsFix = editor.querySelector('.blk div,.blk p,.blk br:not(:last-child)') || [...editor.childNodes].some(n => !(n.nodeType === 1 && n.classList.contains('blk')));
+    let marker = null;
+    if (needsFix && document.activeElement === editor) {
+      const r = currentRange();
+      if (r && r.collapsed) { marker = document.createElement('span'); marker.id = '__caret'; r.insertNode(marker); }
+    }
     let run = null;
     for (const n of [...editor.childNodes]) {
       if (n.nodeType === 1 && n.tagName === 'DIV') {
         run = null;
-        if (!n.classList.contains('blk')) n.className = 'blk t-body';
-        n.querySelectorAll('div,p').forEach(d => { const f = document.createDocumentFragment(); while (d.firstChild) f.appendChild(d.firstChild); d.replaceWith(f); });
-        if (n.querySelector(':not(b):not(i):not(u):not(s):not(br)')) sanitizeInline(n);
+        if (!n.classList.contains('blk')) {
+          const prev = n.previousElementSibling, pt = prev ? typeOf(prev) : 'title';
+          n.className = 'blk t-' + ((pt === 'check' || pt === 'bullet') && !isEmpty(prev) ? pt : 'body');
+        }
+        splitLines(n);
+        if (n.querySelector(':not(b):not(i):not(u):not(s):not(br):not(#__caret)')) sanitizeInline(n);
         if (!n.classList.contains('t-check')) n.removeAttribute('data-done');
         ensureBr(n);
       } else {
@@ -428,8 +462,14 @@
         run.appendChild(n);
       }
     }
-    if (run) ensureBr(run);
+    if (run) { ensureBr(run); splitLines(run); }
     if (!editor.firstChild) editor.appendChild(makeBlock('title'));
+    const first = editor.firstElementChild;
+    if (typeOf(first) !== 'title') setType(first, 'title');
+    if (marker) {
+      if (marker.isConnected) { const r = document.createRange(); r.setStartAfter(marker); r.collapse(true); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+      marker.remove();
+    }
     if (document.activeElement === editor && !currentBlock()) placeCaret(editor.firstChild, true);
     updateEmpty();
   }
@@ -563,7 +603,18 @@
 
   /* ---------------- editing commands ---------------- */
   function applyType(type) {
-    const blocks = selectedBlocks(); if (!blocks.length) return;
+    if (!currentRange() && lastRange) { editor.focus(); const s = getSelection(); s.removeAllRanges(); s.addRange(lastRange); }
+    let blocks = selectedBlocks(); if (!blocks.length) return;
+    const first = editor.firstElementChild;
+    blocks = blocks.filter(b => b !== first);
+    if (!blocks.length) {
+      if (type === 'check' || type === 'bullet') {
+        let nb = first.nextElementSibling;
+        if (!nb || !isEmpty(nb)) { nb = makeBlock(type); first.after(nb); } else setType(nb, type);
+        placeCaret(nb, true); pushHistory(); commit(); updateFmtState();
+      } else showToast('The first line is always the title');
+      return;
+    }
     const allSame = blocks.every(b => typeOf(b) === type);
     const target = allSame && (type === 'check' || type === 'bullet') ? 'body' : type;
     blocks.forEach(b => setType(b, target));
@@ -579,7 +630,7 @@
     if (atStart) { const nb = makeBlock(type); b.before(nb); placeCaret(b, true); return b; }
     const tail = document.createRange(); tail.setStart(r.startContainer, r.startOffset); tail.setEndAfter(b.lastChild);
     const frag = tail.extractContents();
-    const nt = keepType ? type : ((type === 'title' || type === 'heading') && frag.textContent.length === 0 ? 'body' : type);
+    const nt = (type === 'title' || type === 'heading') ? 'body' : type;
     const nb = makeBlock(nt); nb.textContent = ''; nb.appendChild(frag);
     stripLoneBr(nb); ensureBr(nb); ensureBr(b);
     b.after(nb); placeCaret(nb, true);
@@ -601,7 +652,7 @@
     e.preventDefault();
     const type = typeOf(b);
     if (type === 'check' || type === 'bullet') { setType(b, 'body'); pushHistory(); commit(); return; }
-    const prev = b.previousElementSibling; if (!prev) { if (type !== 'body' && isEmpty(b)) { setType(b, 'body'); pushHistory(); commit(); } return; }
+    const prev = b.previousElementSibling; if (!prev) return;
     mergeInto(prev, b); pushHistory(); commit();
   }
   function onDelete(e) {
@@ -625,7 +676,7 @@
   }
   function shortcut(b, r) {
     const before = textBefore(b, r);
-    const m = /^(\[\s?\]|\[x\]|-|\*|#|##)[ \u00a0]$/i.exec(before); if (!m) return false;
+    const m = /^(\[\s?\]|\[x\]|-|\*|#|##)\s$/i.exec(before); if (!m || !getSelection().isCollapsed) return false;
     const tok = m[1].toLowerCase();
     const type = tok === '-' || tok === '*' ? 'bullet' : tok === '#' ? 'title' : tok === '##' ? 'heading' : 'check';
     deleteLeading(b, before.length); setType(b, type);
@@ -705,7 +756,7 @@
       if (c === 'Digit7') { e.preventDefault(); applyType('bullet'); return; }
       if (k === 'u') { e.preventDefault(); const b = currentBlock(); if (b && typeOf(b) === 'check') toggleDone(b); return; }
     }
-    if (e.key === 'Enter' && !e.shiftKey && !e.altKey && !mod) { onEnter(e); return; }
+    if (e.key === 'Enter' && !e.altKey && !mod) { onEnter(e); return; }
     if (e.key === 'Backspace' && !mod) { onBackspace(e); return; }
     if (e.key === 'Delete' && !mod) { onDelete(e); return; }
     if (e.key === 'Escape') { closePops(); if (phone.matches) { editor.blur(); } }
@@ -713,13 +764,13 @@
   editor.addEventListener('beforeinput', e => {
     if (e.inputType === 'historyUndo') { e.preventDefault(); undo(); }
     else if (e.inputType === 'historyRedo') { e.preventDefault(); redo(); }
-    else if (e.inputType === 'insertParagraph') { onEnter(e); } /* virtual keyboards that skip keydown */
+    else if (e.inputType === 'insertParagraph' || e.inputType === 'insertLineBreak') { onEnter(e); } /* keyboards that skip keydown */
   });
   editor.addEventListener('input', e => {
     if (e.isComposing) return;
     normalize();
     const kind = e.inputType || 'x';
-    if (kind === 'insertText' && (e.data === ' ' || e.data === '\u00a0')) { const r = currentRange(); const b = r && blockOf(r.startContainer); if (b && shortcut(b, r)) { pushHistory(); commit(); return; } }
+    if (/^insert/.test(kind)) { const r = currentRange(); const b = r && blockOf(r.startContainer); if (b && b !== editor.firstElementChild && shortcut(b, r)) { pushHistory(); commit(); return; } }
     pushHistory(/^(insertText|deleteContentBackward|deleteContentForward|insertCompositionText)$/.test(kind) ? kind : '');
     scheduleSave();
   });
@@ -738,7 +789,8 @@
     e.preventDefault(); toggleDone(b);
   });
   editor.addEventListener('blur', flush);
-  document.addEventListener('selectionchange', () => { if (!fmtPop.hidden) updateFmtState(); });
+  let lastRange = null;
+  document.addEventListener('selectionchange', () => { const r = currentRange(); if (r) lastRange = r.cloneRange(); if (!fmtPop.hidden) updateFmtState(); });
 
   /* ---------------- events: chrome ---------------- */
   const keepSel = el => el.addEventListener('mousedown', e => e.preventDefault());

@@ -25,6 +25,8 @@ A single-file checklist notebook styled after the iPhone Notes app. No build ste
 | New note | ⌘ ⌥ N | Ctrl Alt N |
 | Search | ⌘ F | Ctrl F |
 
-While typing, at the start of a line: `[] ` starts a checklist item, `[x] ` a checked one, `- ` a bullet, `# ` a title and `## ` a heading. Enter on an empty list item ends the list. Backspace at the start of a list item turns it back into text.
+The first line of a note is always its title. Pressing the checklist button while on the title starts a checklist right below it.
+
+While typing, at the start of any other line: `[] ` starts a checklist item, `[x] ` a checked one, `- ` a bullet and `## ` a heading. Enter on an empty list item ends the list. Backspace at the start of a list item turns it back into text. To turn existing lines into a checklist, select them (or just put the cursor on one) and press the checklist button.
 
 Pasted text keeps its structure: lines starting with `[ ]`, `[x]`, `-` or `•` become list items.
