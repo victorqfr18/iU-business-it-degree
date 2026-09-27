@@ -1,0 +1,434 @@
+{
+  "id": "dlbcsdsjcl01-weak-spots",
+  "title": "Java Class Library: Attempt 3 weak spots",
+  "module": "DLBCSDSJCL01",
+  "description": "The topics that failed on attempts 1 and 2, drilled twice: pick the answer, then write it from a blank page.",
+  "cards": [
+    {
+      "id": "wrap-treeset",
+      "unit": "Unit 4",
+      "type": "input",
+      "front": "Declare and create an empty `TreeSet` of whole numbers called `numbers`.",
+      "answer": "TreeSet<Integer> numbers = new TreeSet<>();",
+      "accept": ["TreeSet<Integer> numbers = new TreeSet<Integer>();", "Set<Integer> numbers = new TreeSet<>();", "Set<Integer> numbers = new TreeSet<Integer>();"],
+      "caseSensitive": true,
+      "explain": "Collections only hold objects, so the type argument must be the wrapper class `Integer`, never the primitive `int`."
+    },
+    {
+      "id": "wrap-linkedlist",
+      "unit": "Unit 4",
+      "type": "input",
+      "front": "Declare and create an empty `LinkedList` of decimal numbers called `prices`.",
+      "answer": "LinkedList<Double> prices = new LinkedList<>();",
+      "accept": ["LinkedList<Double> prices = new LinkedList<Double>();", "List<Double> prices = new LinkedList<>();", "List<Double> prices = new LinkedList<Double>();"],
+      "caseSensitive": true,
+      "explain": "`double` is a primitive. Generics need the wrapper `Double`."
+    },
+    {
+      "id": "wrap-compile",
+      "unit": "Unit 4",
+      "type": "mc",
+      "front": "Which line compiles?",
+      "choices": ["ArrayList<int> a = new ArrayList<>();", "ArrayList<Integer> a = new ArrayList<>();", "ArrayList<integer> a = new ArrayList<>();", "ArrayList a<int> = new ArrayList();"],
+      "answer": 1,
+      "explain": "Type arguments must be reference types. `Integer` is the wrapper for `int` and is capitalised."
+    },
+    {
+      "id": "wrap-table",
+      "unit": "Unit 4",
+      "type": "write",
+      "front": "Write the wrapper class for each primitive: `byte`, `short`, `int`, `long`, `float`, `double`, `char`, `boolean`.",
+      "answer": "Byte, Short, Integer, Long, Float, Double, Character, Boolean",
+      "explain": "The two that are not just the capitalised name: `int` → `Integer` and `char` → `Character`."
+    },
+    {
+      "id": "wrap-hashmap",
+      "unit": "Unit 4",
+      "type": "input",
+      "front": "Declare and create an empty `HashMap` called `students` that maps a student ID (whole number) to a name.",
+      "answer": "HashMap<Integer, String> students = new HashMap<>();",
+      "accept": ["HashMap<Integer, String> students = new HashMap<Integer, String>();", "Map<Integer, String> students = new HashMap<>();", "Map<Integer, String> students = new HashMap<Integer, String>();"],
+      "caseSensitive": true,
+      "explain": "Key type first, value type second, both reference types: `<Integer, String>`."
+    },
+    {
+      "id": "str-replace-trap",
+      "unit": "Unit 5",
+      "type": "mc",
+      "front": "What does this print?",
+      "code": "String s = \"hello\";\ns.replace('l', 'L');\nSystem.out.println(s);",
+      "choices": ["hello", "heLLo", "heLlo", "Compile error"],
+      "answer": 0,
+      "explain": "Strings are immutable. `replace()` returns a NEW string, and here it is thrown away. Fix: `s = s.replace('l', 'L');`"
+    },
+    {
+      "id": "str-replace-fix",
+      "unit": "Unit 5",
+      "type": "input",
+      "front": "`s` holds \"hello\". Write ONE statement so that `s` afterwards holds \"heLLo\".",
+      "answer": "s = s.replace('l', 'L');",
+      "accept": ["s = s.replace(\"l\", \"L\");", "s = s.replaceAll(\"l\", \"L\");"],
+      "caseSensitive": true,
+      "explain": "Assign the result back. Every String method that \"changes\" the string returns a new one."
+    },
+    {
+      "id": "str-upper-trap",
+      "unit": "Unit 5",
+      "type": "mc",
+      "front": "What does this print?",
+      "code": "String name = \"java\";\nname.toUpperCase();\nname.concat(\"!\");\nSystem.out.println(name);",
+      "choices": ["JAVA!", "java!", "JAVA", "java"],
+      "answer": 3,
+      "explain": "Same trap twice. Neither result is assigned, so `name` is still \"java\"."
+    },
+    {
+      "id": "str-valueof",
+      "unit": "Unit 5",
+      "type": "input",
+      "front": "`int age = 42;` Convert `age` to a String using the String class method (not concatenation). Store it in `text`.",
+      "answer": "String text = String.valueOf(age);",
+      "accept": ["String text = Integer.toString(age);"],
+      "caseSensitive": true,
+      "explain": "`String.valueOf(...)` is overloaded for every primitive: int, double, char, boolean and more."
+    },
+    {
+      "id": "str-parse",
+      "unit": "Unit 5",
+      "type": "input",
+      "front": "The opposite direction: turn the String `\"42\"` into an `int` called `n`.",
+      "answer": "int n = Integer.parseInt(\"42\");",
+      "accept": ["int n = Integer.valueOf(\"42\");"],
+      "caseSensitive": true,
+      "explain": "`Integer.parseInt` returns an `int`. `Integer.valueOf` returns an `Integer` (auto-unboxed here)."
+    },
+    {
+      "id": "str-split",
+      "unit": "Unit 5",
+      "type": "mc",
+      "front": "What does this print?",
+      "code": "String csv = \"red,green,blue\";\nString[] parts = csv.split(\",\");\nSystem.out.println(parts.length + \" \" + parts[1]);",
+      "choices": ["3 green", "3 red", "2 green", "3 blue"],
+      "answer": 0,
+      "explain": "`split` returns an array. Arrays are zero-indexed, so `parts[1]` is the second item. Arrays use `.length` with no brackets."
+    },
+    {
+      "id": "str-substring",
+      "unit": "Unit 5",
+      "type": "mc",
+      "front": "What does `\"hello\".substring(1, 3)` return?",
+      "choices": ["\"el\"", "\"ell\"", "\"hel\"", "\"ello\""],
+      "answer": 0,
+      "explain": "Start index is included, end index is excluded: characters 1 and 2 → \"el\"."
+    },
+    {
+      "id": "str-buffer",
+      "unit": "Unit 5",
+      "type": "mc",
+      "front": "What does this print?",
+      "code": "StringBuffer sb = new StringBuffer(\"abc\");\nsb.append(\"d\");\nsb.reverse();\nSystem.out.println(sb);",
+      "choices": ["abc", "abcd", "dcba", "cba"],
+      "answer": 2,
+      "explain": "Unlike String, `StringBuffer` is mutable: `append` and `reverse` change the object itself, no assignment needed."
+    },
+    {
+      "id": "str-length-trio",
+      "unit": "Unit 4",
+      "type": "write",
+      "front": "How do you get the size of: an array `arr`, a String `s`, and an ArrayList `list`?",
+      "answer": "arr.length\ns.length()\nlist.size()",
+      "explain": "Array: field, no brackets. String: method. Collection: `size()`."
+    },
+    {
+      "id": "str-equals",
+      "unit": "Unit 2",
+      "type": "mc",
+      "front": "What does this print?",
+      "code": "String a = new String(\"hi\");\nString b = new String(\"hi\");\nSystem.out.println((a == b) + \" \" + a.equals(b));",
+      "choices": ["true true", "false true", "false false", "true false"],
+      "answer": 1,
+      "explain": "`==` compares references (two different objects). `equals()` compares content."
+    },
+    {
+      "id": "eq-five",
+      "unit": "Unit 2",
+      "type": "write",
+      "front": "Name the five requirements of the `equals()` contract, each with a one-line meaning.",
+      "answer": "1. Reflexive: x.equals(x) is true\n2. Symmetric: x.equals(y) == y.equals(x)\n3. Transitive: x.equals(y) and y.equals(z) → x.equals(z)\n4. Consistent: repeated calls give the same result while nothing changes\n5. Null: x.equals(null) is false",
+      "explain": "Memory hook: R-S-T-C-N, \"Real Students Take Coffee Now\"."
+    },
+    {
+      "id": "eq-which",
+      "unit": "Unit 2",
+      "type": "mc",
+      "front": "`a.equals(b)` is true, but `b.equals(a)` is false. Which requirement is broken?",
+      "choices": ["Reflexive", "Symmetric", "Transitive", "Consistent"],
+      "answer": 1,
+      "explain": "Symmetric means the order must not matter."
+    },
+    {
+      "id": "eq-null",
+      "unit": "Unit 2",
+      "type": "input",
+      "front": "What must `x.equals(null)` return for any non-null `x`?",
+      "answer": "false",
+      "explain": "It must return false, never throw a NullPointerException."
+    },
+    {
+      "id": "eq-hash",
+      "unit": "Unit 2",
+      "type": "mc",
+      "front": "If `a.equals(b)` is true, what must be true about `hashCode()`?",
+      "choices": ["a.hashCode() == b.hashCode()", "a.hashCode() != b.hashCode()", "Nothing, they are unrelated", "Both must return 0"],
+      "answer": 0,
+      "explain": "Equal objects must have equal hash codes. The reverse is NOT required: equal hash codes do not mean equal objects."
+    },
+    {
+      "id": "eq-write",
+      "unit": "Unit 2",
+      "type": "write",
+      "front": "Write `equals()` for a class `Student` with fields `int id` and `String name`.",
+      "answer": "@Override\npublic boolean equals(Object obj) {\n    if (this == obj) return true;\n    if (obj == null || getClass() != obj.getClass()) return false;\n    Student other = (Student) obj;\n    return id == other.id && name.equals(other.name);\n}",
+      "explain": "Four steps: same object? → null or wrong class? → cast → compare fields. The parameter type is `Object`, not `Student`, otherwise you overload instead of override."
+    },
+    {
+      "id": "cmp-write",
+      "unit": "Unit 2",
+      "type": "write",
+      "front": "Make `Student` sortable by `id` (ascending). Write the class header and the `compareTo()` method.",
+      "answer": "public class Student implements Comparable<Student> {\n    private int id;\n\n    @Override\n    public int compareTo(Student other) {\n        return Integer.compare(this.id, other.id);\n    }\n}",
+      "explain": "`implements Comparable<Student>`. Return negative if this comes first, 0 if equal, positive if this comes after. `this.id - other.id` also works for small numbers."
+    },
+    {
+      "id": "cmp-result",
+      "unit": "Unit 2",
+      "type": "mc",
+      "front": "`a.compareTo(b)` returns `-3`. What does that mean?",
+      "choices": ["a comes before b", "a comes after b", "a equals b", "An error happened"],
+      "answer": 0,
+      "explain": "Negative → this object is \"smaller\" and sorts first. Only the sign matters, not the value 3."
+    },
+    {
+      "id": "clone-write",
+      "unit": "Unit 2",
+      "type": "write",
+      "front": "Make class `Point` cloneable. Write the class header and the `clone()` method.",
+      "answer": "public class Point implements Cloneable {\n    private int x, y;\n\n    @Override\n    public Object clone() throws CloneNotSupportedException {\n        return super.clone();\n    }\n}",
+      "explain": "Three parts: `implements Cloneable`, override `clone()` as public, call `super.clone()`. Without `Cloneable`, `super.clone()` throws `CloneNotSupportedException`."
+    },
+    {
+      "id": "clone-shallow",
+      "unit": "Unit 2",
+      "type": "mc",
+      "front": "`super.clone()` on an object that holds an `ArrayList` field. What does the clone get?",
+      "choices": ["A reference to the same ArrayList (shallow copy)", "A new copy of the ArrayList (deep copy)", "null", "An empty ArrayList"],
+      "answer": 0,
+      "explain": "`Object.clone()` is shallow: it copies field values, and for a reference field that value is the reference. Deep copies need extra code."
+    },
+    {
+      "id": "cal-date",
+      "unit": "Unit 5",
+      "type": "write",
+      "front": "Create a `Date` object for 15 March 2026 using `GregorianCalendar`.",
+      "answer": "GregorianCalendar cal = new GregorianCalendar(2026, 2, 15);\nDate date = cal.getTime();",
+      "explain": "Months are zero-indexed: January = 0, so March = 2 (or `Calendar.MARCH`). `getTime()` turns the calendar into a `Date`. The exam wanted a Date object, not a String."
+    },
+    {
+      "id": "cal-month",
+      "unit": "Unit 5",
+      "type": "mc",
+      "front": "Which date does this create?",
+      "code": "new GregorianCalendar(2026, 11, 24)",
+      "choices": ["24 December 2026", "24 November 2026", "24 October 2026", "Error: month 11 is invalid"],
+      "answer": 0,
+      "explain": "Month 11 is December because January is 0. Days are NOT zero-indexed."
+    },
+    {
+      "id": "cal-get",
+      "unit": "Unit 5",
+      "type": "mc",
+      "front": "`cal` is set to 1 July. What does `cal.get(Calendar.MONTH)` return?",
+      "choices": ["6", "7", "\"July\"", "0"],
+      "answer": 0,
+      "explain": "The month number stays zero-indexed when you read it back: July → 6."
+    },
+    {
+      "id": "sdf-format",
+      "unit": "Unit 5",
+      "type": "write",
+      "front": "Print `date` (a `Date`) in the format `15.03.2026`.",
+      "answer": "SimpleDateFormat sdf = new SimpleDateFormat(\"dd.MM.yyyy\");\nSystem.out.println(sdf.format(date));",
+      "explain": "`format(Date)` → String. `parse(String)` → Date (throws `ParseException`). Capital `MM` is month, small `mm` is minutes."
+    },
+    {
+      "id": "sdf-mm",
+      "unit": "Unit 5",
+      "type": "mc",
+      "front": "In a `SimpleDateFormat` pattern, what does `mm` (lowercase) mean?",
+      "choices": ["Minutes", "Month", "Milliseconds", "Month name"],
+      "answer": 0,
+      "explain": "`MM` = month, `mm` = minutes, `HH` = hour (0-23), `yyyy` = year, `dd` = day."
+    },
+    {
+      "id": "map-dup",
+      "unit": "Unit 4",
+      "type": "mc",
+      "front": "What does this print?",
+      "code": "Map<String, Integer> m = new HashMap<>();\nm.put(\"a\", 1);\nm.put(\"b\", 2);\nm.put(\"a\", 3);\nSystem.out.println(m.size() + \" \" + m.get(\"a\"));",
+      "choices": ["2 3", "3 3", "2 1", "3 1"],
+      "answer": 0,
+      "explain": "Keys are unique. A second `put` with the same key overwrites the value, and the size stays 2."
+    },
+    {
+      "id": "set-dup",
+      "unit": "Unit 4",
+      "type": "mc",
+      "front": "What does this print?",
+      "code": "Set<String> s = new HashSet<>();\ns.add(\"x\");\nboolean added = s.add(\"x\");\nSystem.out.println(added + \" \" + s.size());",
+      "choices": ["false 1", "true 2", "true 1", "false 2"],
+      "answer": 0,
+      "explain": "Sets reject duplicates: `add` returns false and the size does not change."
+    },
+    {
+      "id": "treeset-order",
+      "unit": "Unit 4",
+      "type": "mc",
+      "front": "What does this print?",
+      "code": "TreeSet<Integer> t = new TreeSet<>();\nt.add(5); t.add(1); t.add(3); t.add(1);\nSystem.out.println(t);",
+      "choices": ["[1, 3, 5]", "[5, 1, 3]", "[5, 1, 3, 1]", "[1, 1, 3, 5]"],
+      "answer": 0,
+      "explain": "TreeSet keeps elements sorted and drops duplicates. HashSet gives no order guarantee."
+    },
+    {
+      "id": "list-perf",
+      "unit": "Unit 4",
+      "type": "mc",
+      "front": "You call `get(i)` thousands of times on a large list, with almost no inserts. Which is faster?",
+      "choices": ["ArrayList", "LinkedList", "They are equal", "Neither supports get(i)"],
+      "answer": 0,
+      "explain": "ArrayList = cinema seats: jump straight to seat i. LinkedList = chain of people: walk from the start to reach i."
+    },
+    {
+      "id": "list-perf2",
+      "unit": "Unit 4",
+      "type": "mc",
+      "front": "You constantly add and remove items at the FRONT of a list. Which is faster?",
+      "choices": ["LinkedList", "ArrayList", "They are equal", "Neither can do this"],
+      "answer": 0,
+      "explain": "LinkedList just re-links the first node. ArrayList has to shift every other element one place."
+    },
+    {
+      "id": "stack-lifo",
+      "unit": "Unit 4",
+      "type": "mc",
+      "front": "What does this print?",
+      "code": "Stack<String> st = new Stack<>();\nst.push(\"A\"); st.push(\"B\"); st.push(\"C\");\nst.pop();\nSystem.out.println(st.peek());",
+      "choices": ["B", "C", "A", "[A, B]"],
+      "answer": 0,
+      "explain": "Stack = pile of plates (LIFO). `pop` removes C, `peek` looks at the new top without removing it: B."
+    },
+    {
+      "id": "queue-fifo",
+      "unit": "Unit 4",
+      "type": "mc",
+      "front": "What does this print?",
+      "code": "Queue<String> q = new LinkedList<>();\nq.offer(\"A\"); q.offer(\"B\"); q.offer(\"C\");\nq.poll();\nSystem.out.println(q.peek());",
+      "choices": ["B", "A", "C", "null"],
+      "answer": 0,
+      "explain": "Queue = supermarket line (FIFO). `poll` removes A from the front, so B is next."
+    },
+    {
+      "id": "iterator-write",
+      "unit": "Unit 4",
+      "type": "write",
+      "front": "Using an `Iterator`, print every element of `List<String> names`.",
+      "answer": "Iterator<String> it = names.iterator();\nwhile (it.hasNext()) {\n    System.out.println(it.next());\n}",
+      "explain": "`hasNext()` checks, `next()` returns and moves on. Use `it.remove()` (not `names.remove`) to delete while iterating."
+    },
+    {
+      "id": "override-overload",
+      "unit": "Unit 1",
+      "type": "mc",
+      "front": "A subclass declares a method with the SAME name and the SAME parameter list as a method in its superclass. That is…",
+      "choices": ["Overriding", "Overloading", "Hiding", "A compile error"],
+      "answer": 0,
+      "explain": "Override = same signature, in a subclass, replaces behaviour. Overload = same name, DIFFERENT parameters, usually in the same class."
+    },
+    {
+      "id": "overload-spot",
+      "unit": "Unit 1",
+      "type": "mc",
+      "front": "Which pair is an OVERLOAD?",
+      "choices": ["int add(int a, int b) and double add(double a, double b)", "int add(int a, int b) and int add(int x, int y)", "int add(int a, int b) and long add(int a, int b)", "An @Override of add in a subclass"],
+      "answer": 0,
+      "explain": "Only the parameter types/count make an overload. Renaming parameters or changing only the return type does not (the last two do not compile)."
+    },
+    {
+      "id": "annotations",
+      "unit": "Unit 1",
+      "type": "write",
+      "front": "Name the three standard annotations from Unit 1 and what each one does.",
+      "answer": "@Override: compiler checks that the method really overrides a superclass method\n@Deprecated: marks something as outdated, compiler warns when it is used\n@SuppressWarnings: tells the compiler to hide a given warning",
+      "explain": "`@Override` catches the classic `equals(Student s)` mistake at compile time."
+    },
+    {
+      "id": "javadoc",
+      "unit": "Unit 1",
+      "type": "write",
+      "front": "Write a Javadoc comment for `public int add(int a, int b)`.",
+      "answer": "/**\n * Adds two numbers.\n * @param a the first number\n * @param b the second number\n * @return the sum of a and b\n */",
+      "explain": "Starts with `/**` (two stars). One `@param` per parameter, `@return` for the result. Others: `@throws`, `@author`, `@version`."
+    },
+    {
+      "id": "naming",
+      "unit": "Unit 1",
+      "type": "mc",
+      "front": "Which follows Java naming conventions for a constant?",
+      "choices": ["MAX_SIZE", "maxSize", "MaxSize", "max_size"],
+      "answer": 0,
+      "explain": "Constants: UPPER_SNAKE_CASE. Classes: UpperCamelCase. Methods and variables: lowerCamelCase. Packages: all lowercase."
+    },
+    {
+      "id": "import-lang",
+      "unit": "Unit 3",
+      "type": "mc",
+      "front": "Which package never needs an `import` statement?",
+      "choices": ["java.lang", "java.util", "java.io", "java.text"],
+      "answer": 0,
+      "explain": "`java.lang` (String, Math, Integer, System…) is imported automatically. `ArrayList` needs `import java.util.ArrayList;`."
+    },
+    {
+      "id": "import-pkg",
+      "unit": "Unit 3",
+      "type": "write",
+      "front": "Which import do you need for each: `ArrayList`, `SimpleDateFormat`, `File`, `GregorianCalendar`?",
+      "answer": "import java.util.ArrayList;\nimport java.text.SimpleDateFormat;\nimport java.io.File;\nimport java.util.GregorianCalendar;",
+      "explain": "Collections and calendar → java.util. Date formatting → java.text. Files and streams → java.io."
+    },
+    {
+      "id": "stream-types",
+      "unit": "Unit 6",
+      "type": "mc",
+      "front": "You need to read a plain text file character by character. Which family of classes fits?",
+      "choices": ["Reader (e.g. FileReader)", "InputStream (e.g. FileInputStream)", "OutputStream", "Writer"],
+      "answer": 0,
+      "explain": "Reader/Writer = characters (text). InputStream/OutputStream = raw bytes (images, binary)."
+    },
+    {
+      "id": "file-read",
+      "unit": "Unit 6",
+      "type": "write",
+      "front": "Read `notes.txt` line by line and print each line.",
+      "answer": "try (BufferedReader br = new BufferedReader(new FileReader(\"notes.txt\"))) {\n    String line;\n    while ((line = br.readLine()) != null) {\n        System.out.println(line);\n    }\n} catch (IOException e) {\n    e.printStackTrace();\n}",
+      "explain": "`readLine()` returns null at the end of the file. try-with-resources closes the reader for you. File IO throws the checked `IOException`."
+    },
+    {
+      "id": "file-class",
+      "unit": "Unit 6",
+      "type": "mc",
+      "front": "`File f = new File(\"data.txt\");` — the file does not exist yet. What happens?",
+      "choices": ["Nothing on disk; f.exists() returns false", "An empty data.txt is created", "FileNotFoundException", "IOException"],
+      "answer": 0,
+      "explain": "A `File` object is only a path. Call `f.createNewFile()` to actually create it."
+    }
+  ]
+}
