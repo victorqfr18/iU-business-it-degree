@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flashcards</title>
+<meta name="description" content="Flashcard quiz for IU Business IT modules. Decks come from a Claude project; missed cards go back to Claude as a report.">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Flashcards">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='14' y='6' width='44' height='34' rx='6' fill='%23a5a8f0'/%3E%3Crect x='6' y='18' width='44' height='34' rx='6' fill='%234b4fd6'/%3E%3Cpath d='M18 35l6 6 12-12' stroke='%23fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#ffffff; --bg2:#f2f2f7; --text:#1c1c1e; --text2:#6e6e73; --text3:#8e8e93;
+    --line:rgba(60,60,67,.22); --accent:#4b4fd6; --accent-fg:#ffffff; --accent-soft:rgba(75,79,214,.12);
+    --hover:rgba(60,60,67,.06); --field:rgba(118,118,128,.12); --code:#f4f4f8;
+    --good:#1f8a4c; --good-soft:rgba(31,138,76,.13); --bad:#d93a2f; --bad-soft:rgba(217,58,47,.12);
+    --shadow:0 10px 40px rgba(0,0,0,.16), 0 0 0 .5px rgba(0,0,0,.08);
+    --toast:#1c1c1e; --toast-fg:#ffffff;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1c1c1e; --bg2:#000000; --text:#f2f2f7; --text2:#a1a1a6; --text3:#8d8d93;
+      --line:rgba(84,84,88,.55); --accent:#8e91ff; --accent-fg:#0b0b1f; --accent-soft:rgba(142,145,255,.18);
+      --hover:rgba(255,255,255,.06); --field:rgba(118,118,128,.24); --code:#111113;
+      --good:#4cd07d; --good-soft:rgba(76,208,125,.15); --bad:#ff6b61; --bad-soft:rgba(255,107,97,.15);
+      --shadow:0 10px 40px rgba(0,0,0,.6), 0 0 0 .5px rgba(255,255,255,.1);
+      --toast:#f2f2f7; --toast-fg:#1c1c1e;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1c1c1e; --bg2:#000000; --text:#f2f2f7; --text2:#a1a1a6; --text3:#8d8d93;
+    --line:rgba(84,84,88,.55); --accent:#8e91ff; --accent-fg:#0b0b1f; --accent-soft:rgba(142,145,255,.18);
+    --hover:rgba(255,255,255,.06); --field:rgba(118,118,128,.24); --code:#111113;
+    --good:#4cd07d; --good-soft:rgba(76,208,125,.15); --bad:#ff6b61; --bad-soft:rgba(255,107,97,.15);
+    --shadow:0 10px 40px rgba(0,0,0,.6), 0 0 0 .5px rgba(255,255,255,.1);
+    --toast:#f2f2f7; --toast-fg:#1c1c1e;
+  }
+
+  *,*::before,*::after{box-sizing:border-box}
+  [hidden]{display:none !important}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0; min-height:100vh; background:var(--bg2); color:var(--text); font-family:var(--font); font-size:17px; line-height:1.45; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent}
+  button{font:inherit; color:inherit; background:none; border:0; padding:0; margin:0; cursor:pointer}
+  button:disabled{cursor:default; opacity:.45}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  code,pre,textarea.code{font-family:var(--mono)}
+  code{font-size:.9em; background:var(--field); padding:1px 5px; border-radius:5px; overflow-wrap:anywhere}
+  pre{margin:12px 0 0; padding:12px 14px; background:var(--code); border:.5px solid var(--line); border-radius:10px; font-size:14px; line-height:1.5; overflow-x:auto; white-space:pre}
+
+  .wrap{max-width:720px; margin:0 auto; padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(48px + env(safe-area-inset-bottom,0px))}
+  header.top{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin:8px 0 18px}
+  header.top h1{font-size:34px; line-height:1.1; font-weight:700; letter-spacing:-.02em; margin:0}
+  .sub{color:var(--text2); font-size:15px; margin:4px 0 0}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:40px; padding:0 16px; border-radius:12px; font-weight:600; font-size:16px; background:var(--field); white-space:nowrap}
+  .btn:hover:not(:disabled){filter:brightness(.97)}
+  .btn.primary{background:var(--accent); color:var(--accent-fg)}
+  .btn.ghost{background:none; color:var(--accent); padding:0 8px}
+  .btn.small{min-height:34px; font-size:15px; padding:0 12px; border-radius:10px}
+  .btn.good{background:var(--good-soft); color:var(--good)}
+  .btn.bad{background:var(--bad-soft); color:var(--bad)}
+  .btn kbd{font:600 11px var(--mono); opacity:.6; border:1px solid currentColor; border-radius:4px; padding:0 4px}
+
+  .card{background:var(--bg); border-radius:16px; padding:18px; margin-bottom:14px}
+  .deck h2{font-size:20px; line-height:1.25; margin:0; letter-spacing:-.01em}
+  .deck .mod{font-size:13px; font-weight:600; color:var(--accent); letter-spacing:.02em; text-transform:uppercase}
+  .deck p{margin:6px 0 0; color:var(--text2); font-size:15px}
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:14px 0}
+  .stat{background:var(--bg2); border-radius:10px; padding:8px 10px}
+  .stat b{display:block; font-size:22px; font-variant-numeric:tabular-nums; line-height:1.2}
+  .stat span{font-size:12px; color:var(--text2)}
+  .bar{height:6px; background:var(--field); border-radius:3px; overflow:hidden; display:flex}
+  .bar i{display:block; height:100%}
+  .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:14px}
+  .row .grow{flex:1}
+  select{font:inherit; font-size:15px; color:var(--text); background:var(--field); border:0; border-radius:10px; min-height:34px; padding:0 10px}
+  .grow{flex:1}
+  .deckfoot{display:flex; flex-wrap:wrap; gap:4px 12px; margin-top:10px; font-size:14px}
+  .deckfoot button{color:var(--accent)}
+  .deckfoot .danger{color:var(--bad)}
+  .tag{font-size:12px; color:var(--text3)}
+  .howto{font-size:15px; color:var(--text2)}
+  .howto ol{margin:8px 0 0; padding-left:20px}
+  .howto li{margin:4px 0}
+  .empty{text-align:center; color:var(--text2); padding:36px 18px}
+
+  /* session */
+  .shead{display:flex; align-items:center; gap:10px; margin:4px 0 14px}
+  .shead .bar{flex:1}
+  .shead .count{font-size:14px; color:var(--text2); font-variant-numeric:tabular-nums; min-width:52px; text-align:right}
+  .q .meta{display:flex; gap:8px; font-size:13px; color:var(--text3); margin-bottom:8px}
+  .q .meta .kind{color:var(--accent); font-weight:600}
+  .q .front{font-size:20px; line-height:1.4; font-weight:600; letter-spacing:-.005em}
+  .choices{display:grid; gap:8px; margin-top:16px}
+  .choice{display:flex; gap:12px; align-items:flex-start; text-align:left; padding:12px 14px; border-radius:12px; background:var(--bg2); border:1.5px solid transparent; font-size:16px}
+  .choice:hover:not(:disabled){border-color:var(--accent-soft)}
+  .choice .k{flex:none; width:24px; height:24px; border-radius:50%; background:var(--field); display:grid; place-items:center; font-size:13px; font-weight:700; margin-top:1px}
+  .choice .v{min-width:0; overflow-wrap:anywhere}
+  .choice.right{border-color:var(--good); background:var(--good-soft)}
+  .choice.right .k{background:var(--good); color:var(--bg)}
+  .choice.wrong{border-color:var(--bad); background:var(--bad-soft)}
+  .choice.wrong .k{background:var(--bad); color:var(--bg)}
+  .choice:disabled{opacity:1; cursor:default}
+  textarea,input[type=text]{width:100%; font:inherit; color:var(--text); background:var(--bg2); border:1.5px solid var(--line); border-radius:12px; padding:10px 12px; resize:vertical}
+  textarea:focus,input[type=text]:focus{outline:none; border-color:var(--accent)}
+  textarea.code,input.code{font-family:var(--mono); font-size:15px}
+  .answerbox{margin-top:16px}
+  .answerbox label{display:block; font-size:13px; color:var(--text2); margin-bottom:6px}
+  .verdict{margin-top:16px; padding:12px 14px; border-radius:12px; font-size:15px}
+  .verdict.right{background:var(--good-soft)}
+  .verdict.wrong{background:var(--bad-soft)}
+  .verdict .h{font-weight:700; margin-bottom:4px}
+  .verdict.right .h{color:var(--good)} .verdict.wrong .h{color:var(--bad)}
+  .model{margin-top:14px}
+  .model .lbl{font-size:13px; color:var(--text2); margin-bottom:2px}
+  .model .txt{white-space:pre-wrap}
+  .explain{margin-top:12px; font-size:15px; color:var(--text2)}
+  .actions{display:flex; gap:8px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap}
+  .hint{font-size:12px; color:var(--text3); text-align:center; margin-top:14px}
+
+  /* summary */
+  .score{font-size:48px; font-weight:700; letter-spacing:-.02em; line-height:1.1}
+  .missed{list-style:none; padding:0; margin:12px 0 0}
+  .missed li{padding:10px 0; border-top:.5px solid var(--line); font-size:15px}
+  .missed li .a{color:var(--text2); margin-top:2px}
+
+  dialog{border:0; padding:0; border-radius:16px; background:var(--bg); color:var(--text); box-shadow:var(--shadow); width:min(640px, calc(100vw - 32px)); max-height:calc(100vh - 48px)}
+  dialog::backdrop{background:rgba(0,0,0,.35)}
+  dialog .in{padding:18px}
+  dialog h3{margin:0 0 6px; font-size:20px}
+  dialog p{margin:0 0 10px; font-size:15px; color:var(--text2)}
+  dialog textarea{min-height:220px; font-family:var(--mono); font-size:13px}
+  .err{color:var(--bad); font-size:14px; margin-top:8px; white-space:pre-wrap}
+
+  .toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom,0px)); transform:translate(-50%, 20px); opacity:0; pointer-events:none; background:var(--toast); color:var(--toast-fg); padding:10px 16px; border-radius:12px; font-size:15px; transition:opacity .2s, transform .2s; max-width:calc(100vw - 32px)}
+  .toast.show{opacity:1; transform:translate(-50%,0)}
+
+  @media (max-width:520px){
+    header.top h1{font-size:30px}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .q .front{font-size:18px}
+    .actions .btn{flex:1}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ HOME ============ -->
+  <section id="home">
+    <header class="top">
+      <div>
+        <h1>Flashcards</h1>
+        <p class="sub">Recognise it, then write it from a blank page.</p>
+      </div>
+      <button class="btn primary small" id="importBtn">Import deck</button>
+    </header>
+    <div id="decks"></div>
+    <div class="card howto">
+      <b style="color:var(--text)">Link it to your Claude project</b>
+      <ol>
+        <li><button class="btn ghost small" id="copyInstr" style="padding:0;min-height:0;display:inline">Copy the Claude instructions</button> and paste them into your Claude project's custom instructions (<a href="https://github.com/victorqfr18/iU-business-it-degree/blob/main/flashcards/CLAUDE_PROJECT.md">read them</a>).</li>
+        <li>In the project, ask Claude: <i>"Make flashcards for Unit 4."</i> It replies with a JSON deck.</li>
+        <li>Copy it, press <b>Import deck</b> here and paste. Same deck id = cards are updated, progress is kept.</li>
+        <li>After a session, press <b>Copy report for Claude</b> and paste it into the project chat so Claude re-teaches what you missed.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ SESSION ============ -->
+  <section id="session" hidden>
+    <div class="shead">
+      <button class="btn ghost small" id="quitBtn" aria-label="End session">✕ End</button>
+      <div class="bar" aria-hidden="true"><i id="sbar" style="background:var(--accent)"></i></div>
+      <div class="count" id="scount"></div>
+    </div>
+    <div class="card q" id="qcard"></div>
+    <p class="hint" id="qhint"></p>
+  </section>
+
+  <!-- ============ SUMMARY ============ -->
+  <section id="summary" hidden>
+    <div class="card" id="sumcard"></div>
+  </section>
+</div>
+
+<dialog id="importDlg">
+  <form method="dialog" class="in" id="importForm">
+    <h3>Import a deck</h3>
+    <p>Paste the JSON deck Claude gave you (the code fences are fine), or choose a .json file.</p>
+    <textarea id="importText" spellcheck="false" placeholder='{ "id": "...", "title": "...", "cards": [ ... ] }'></textarea>
+    <div class="err" id="importErr"></div>
+    <div class="row">
+      <label class="btn small" style="cursor:pointer">Choose file<input type="file" id="importFile" accept=".json,application/json,text/plain" hidden></label>
+      <span class="grow"></span>
+      <button class="btn small" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary small" id="importGo" value="default">Import</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ---------- storage ---------- */
+  const KEY_DECKS = "fq.importedDecks.v1", KEY_PROG = "fq.progress.v1", KEY_PREF = "fq.prefs.v1";
+  const load = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
+  const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { toast("Could not save — browser storage is off or full"); } };
+
+  let builtIn = {};                          // id -> deck, from decks/
+  let imported = load(KEY_DECKS, {});        // id -> deck, pasted by the user
+  let progress = load(KEY_PROG, {});         // deckId -> cardId -> {box, due, right, wrong, last}
+  let prefs = load(KEY_PREF, { size: 20, unit: {} });
+
+  const DAY = 864e5;
+  const INTERVALS = [0, 0, 1, 3, 7, 16, 35];   // days until due, by box (1..6). Box 0 = new.
+  const MAX_BOX = 6;
+
+  const decks = () => ({ ...builtIn, ...imported });
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  // Light inline formatting: `code`, **bold**, newlines.
+  const fmt = s => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>");
+  const looksLikeCode = s => /\n/.test(s) && /[;{}()=<>]/.test(s);
+
+  /* ---------- deck validation ---------- */
+  function hash(s) { let h = 5381; for (let i = 0; i < s.length; i++) h = (h * 33 ^ s.charCodeAt(i)) >>> 0; return h.toString(36); }
+  function slug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "deck"; }
+
+  function normaliseDeck(raw) {
+    if (Array.isArray(raw)) raw = { title: "Imported deck", cards: raw };
+    if (!raw || typeof raw !== "object") throw new Error("That is not a deck object.");
+    if (!Array.isArray(raw.cards) || !raw.cards.length) throw new Error('The deck needs a non-empty "cards" array.');
+    const title = String(raw.title || "Imported deck");
+    const deck = { id: String(raw.id || slug(title)), title, module: raw.module ? String(raw.module) : "", description: raw.description ? String(raw.description) : "", cards: [] };
+    const seen = new Set(), problems = [];
+    raw.cards.forEach((c, i) => {
+      const n = i + 1;
+      if (!c || typeof c !== "object") return problems.push(`Card ${n}: not an object`);
+      const front = c.front ?? c.q ?? c.question;
+      if (!front) return problems.push(`Card ${n}: missing "front"`);
+      let type = c.type || (Array.isArray(c.choices) ? "mc" : "write");
+      if (!["mc", "input", "write"].includes(type)) return problems.push(`Card ${n}: unknown type "${type}"`);
+      const card = { id: String(c.id || hash(String(front) + (c.code || ""))), type, unit: c.unit ? String(c.unit) : "", front: String(front), code: c.code ? String(c.code) : "", explain: c.explain ? String(c.explain) : "" };
+      if (type === "mc") {
+        if (!Array.isArray(c.choices) || c.choices.length < 2) return problems.push(`Card ${n}: "mc" needs at least 2 choices`);
+        card.choices = c.choices.map(String);
+        let a = c.answer;
+        if (typeof a === "string") a = card.choices.includes(a) ? card.choices.indexOf(a) : /^\d+$/.test(a.trim()) ? Number(a) : -1;
+        a = Number(a);
+        if (!Number.isInteger(a) || a < 0 || a >= card.choices.length) return problems.push(`Card ${n}: "answer" must be the index of the right choice (0 = first)`);
+        card.answer = a;
+      } else {
+        if (c.answer == null || c.answer === "") return problems.push(`Card ${n}: missing "answer"`);
+        card.answer = String(c.answer);
+        if (type === "input") { card.accept = Array.isArray(c.accept) ? c.accept.map(String) : []; card.caseSensitive = !!c.caseSensitive; }
+      }
+      while (seen.has(card.id)) card.id += "-" + n;
+      seen.add(card.id);
+      deck.cards.push(card);
+    });
+    if (problems.length) throw new Error(problems.slice(0, 8).join("\n") + (problems.length > 8 ? `\n…and ${problems.length - 8} more` : ""));
+    return deck;
+  }
+
+  function parseDeckText(text) {
+    let t = text.trim();
+    const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if (fence) t = fence[1].trim();
+    if (!t) throw new Error("Nothing to import.");
+    let raw;
+    try { raw = JSON.parse(t); }
+    catch (e) {
+      // Tolerate text around the JSON: take the outermost {...}
+      const s = t.indexOf("{"), en = t.lastIndexOf("}");
+      if (s < 0 || en <= s) throw new Error("Could not read JSON: " + e.message);
+      try { raw = JSON.parse(t.slice(s, en + 1)); } catch (e2) { throw new Error("Could not read JSON: " + e2.message); }
+    }
+    return normaliseDeck(raw);
+  }
+
+  /* ---------- progress ---------- */
+  const cardProg = (deckId, cardId) => (progress[deckId] || {})[cardId] || { box: 0, due: 0, right: 0, wrong: 0 };
+  function record(deckId, card, correct, given) {
+    const p = { ...cardProg(deckId, card.id) };
+    // New and right → box 2 (due tomorrow). Right again → one box up. Wrong → box 1 (due again now).
+    p.box = correct ? (p.box === 0 ? 2 : Math.min(MAX_BOX, p.box + 1)) : 1;
+    p.due = Date.now() + INTERVALS[p.box] * DAY;
+    correct ? p.right++ : p.wrong++;
+    p.last = Date.now();
+    if (!correct && given) p.lastWrong = String(given).slice(0, 400);
+    (progress[deckId] ||= {})[card.id] = p;
+    save(KEY_PROG, progress);
+  }
+
+  function deckStats(deck) {
+    const now = Date.now();
+    let fresh = 0, due = 0, learning = 0, mastered = 0;
+    for (const c of deck.cards) {
+      const p = cardProg(deck.id, c.id);
+      if (p.box === 0) fresh++;
+      else if (p.due <= now) due++;
+      else if (p.box >= 5) mastered++;
+      else learning++;
+    }
+    return { fresh, due, learning, mastered, total: deck.cards.length };
+  }
+
+  const units = deck => [...new Set(deck.cards.map(c => c.unit).filter(Boolean))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  /* ---------- home ---------- */
+  function renderHome() {
+    const all = Object.values(decks());
+    const host = $("#decks");
+    if (!all.length) {
+      host.innerHTML = `<div class="card empty">No decks yet.<br>Ask your Claude project for flashcards, then press <b>Import deck</b>.</div>`;
+      return;
+    }
+    host.innerHTML = all.map(d => {
+      const s = deckStats(d), us = units(d), pct = n => (n / s.total * 100).toFixed(2) + "%";
+      const unitSel = prefs.unit[d.id] || "";
+      return `<article class="card deck" data-id="${esc(d.id)}">
+        ${d.module ? `<div class="mod">${esc(d.module)}</div>` : ""}
+        <h2>${esc(d.title)}</h2>
+        ${d.description ? `<p>${fmt(d.description)}</p>` : ""}
+        <div class="stats">
+          <div class="stat"><b>${s.due}</b><span>Due now</span></div>
+          <div class="stat"><b>${s.fresh}</b><span>New</span></div>
+          <div class="stat"><b>${s.learning}</b><span>Learning</span></div>
+          <div class="stat"><b>${s.mastered}</b><span>Locked in</span></div>
+        </div>
+        <div class="bar" title="Locked in / learning / due / new">
+          <i style="width:${pct(s.mastered)};background:var(--good)"></i>
+          <i style="width:${pct(s.learning)};background:var(--accent)"></i>
+          <i style="width:${pct(s.due)};background:var(--bad)"></i>
+        </div>
+        <div class="row">
+          <button class="btn primary" data-act="study">Study</button>
+          <button class="btn" data-act="weak">Drill mistakes</button>
+          <button class="btn" data-act="all">Everything</button>
+          <span class="grow"></span>
+          ${us.length > 1 ? `<select data-act="unit" aria-label="Filter by unit"><option value="">All units</option>${us.map(u => `<option ${u === unitSel ? "selected" : ""}>${esc(u)}</option>`).join("")}</select>` : ""}
+        </div>
+        <div class="deckfoot">
+          <button data-act="report">Copy weak-spot report for Claude</button>
+          <button data-act="reset">Reset progress</button>
+          ${imported[d.id] ? `<button data-act="delete" class="danger">Delete deck</button>` : ""}
+          <span class="grow"></span>
+          <span class="tag">${s.total} cards${imported[d.id] ? " · imported" : ""}</span>
+        </div>
+      </article>`;
+    }).join("");
+  }
+
+  $("#decks").addEventListener("click", e => {
+    const b = e.target.closest("button[data-act]"); if (!b) return;
+    const deck = decks()[b.closest("[data-id]").dataset.id];
+    const act = b.dataset.act;
+    if (act === "study" || act === "weak" || act === "all") startSession(deck, act);
+    else if (act === "report") copy(weakReport(deck), "Report copied — paste it into your Claude project");
+    else if (act === "reset") {
+      if (confirm(`Reset all progress for "${deck.title}"?`)) { delete progress[deck.id]; save(KEY_PROG, progress); renderHome(); }
+    } else if (act === "delete") {
+      if (confirm(`Delete "${deck.title}" and its progress?`)) { delete imported[deck.id]; delete progress[deck.id]; save(KEY_DECKS, imported); save(KEY_PROG, progress); renderHome(); }
+    }
+  });
+  $("#decks").addEventListener("change", e => {
+    if (e.target.dataset.act !== "unit") return;
+    const id = e.target.closest("[data-id]").dataset.id;
+    e.target.value ? prefs.unit[id] = e.target.value : delete prefs.unit[id];
+    save(KEY_PREF, prefs);
+  });
+
+  /* ---------- session ---------- */
+  let S = null;   // current session
+
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  function startSession(deck, mode) {
+    const now = Date.now(), unit = prefs.unit[deck.id];
+    let pool = deck.cards.filter(c => !unit || c.unit === unit);
+    const P = c => cardProg(deck.id, c.id);
+    let picked;
+    if (mode === "study") {
+      const due = shuffle(pool.filter(c => P(c).box > 0 && P(c).due <= now)).sort((a, b) => P(a).box - P(b).box);
+      const fresh = pool.filter(c => P(c).box === 0);
+      picked = [...due, ...fresh].slice(0, prefs.size);
+      if (!picked.length) return toast("Nothing due" + (unit ? ` in ${unit}` : "") + ". Try “Drill mistakes” or “Everything”.");
+    } else if (mode === "weak") {
+      picked = pool.filter(c => P(c).wrong > 0 || (P(c).box > 0 && P(c).box <= 2))
+        .sort((a, b) => (P(b).wrong - P(b).right * .5) - (P(a).wrong - P(a).right * .5)).slice(0, prefs.size);
+      if (!picked.length) return toast("No mistakes recorded yet" + (unit ? ` in ${unit}` : "") + ".");
+      shuffle(picked);
+    } else {
+      picked = shuffle(pool.slice());
+    }
+    S = { deck, queue: picked.slice(), total: picked.length, done: 0, first: new Map(), log: [] };
+    show("session");
+    next();
+  }
+
+  function next() {
+    if (!S.queue.length) return finish();
+    S.card = S.queue.shift();
+    S.answered = false;
+    renderCard();
+  }
+
+  function renderCard() {
+    const c = S.card, q = $("#qcard"), retry = S.first.has(c.id);
+    $("#sbar").style.width = (S.done / S.total * 100) + "%";
+    $("#scount").textContent = `${S.done} / ${S.total}`;
+    const kind = { mc: "Pick one", input: "Type it", write: "Write it from memory" }[c.type];
+    let html = `<div class="meta"><span class="kind">${kind}</span>${c.unit ? `<span>${esc(c.unit)}</span>` : ""}${retry ? `<span>· retry</span>` : ""}</div>
+      <div class="front">${fmt(c.front)}</div>${c.code ? `<pre>${esc(c.code)}</pre>` : ""}`;
+    if (c.type === "mc") {
+      S.order = shuffle(c.choices.map((_, i) => i));
+      html += `<div class="choices">${S.order.map((ci, k) => `<button class="choice" data-ci="${ci}"><span class="k">${k + 1}</span><span class="v">${fmt(c.choices[ci])}</span></button>`).join("")}</div><div id="after"></div>`;
+      $("#qhint").textContent = "Keys 1–" + c.choices.length + " to answer, Enter to continue";
+    } else if (c.type === "input") {
+      html += `<div class="answerbox"><label for="ans">Your answer</label><input type="text" id="ans" class="code" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+        <div id="after"></div><div class="actions" id="acts"><button class="btn primary" id="check">Check <kbd>Enter</kbd></button></div>`;
+      $("#qhint").textContent = "Enter to check";
+    } else {
+      html += `<div class="answerbox"><label for="ans">Write it on paper or here, then reveal. Don't peek.</label><textarea id="ans" class="${looksLikeCode(c.answer) ? "code" : ""}" rows="${looksLikeCode(c.answer) ? 7 : 3}" spellcheck="false" autocapitalize="off"></textarea></div><div id="after"></div>
+        <div class="actions" id="acts"><button class="btn primary" id="reveal">Show answer <kbd>${isMac ? "⌘" : "Ctrl"}↵</kbd></button></div>`;
+      $("#qhint").textContent = `${isMac ? "⌘" : "Ctrl"}+Enter to reveal, then 1 = missed it, 2 = got it`;
+    }
+    q.innerHTML = html;
+    const ans = $("#ans", q);
+    if (ans && matchMedia("(pointer:fine)").matches) ans.focus();
+    window.scrollTo({ top: 0 });
+  }
+
+  const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+
+  function modelAnswer(c) {
+    const a = c.type === "mc" ? c.choices[c.answer] : c.answer;
+    return `<div class="model"><div class="lbl">Answer</div>${looksLikeCode(a) ? `<pre>${esc(a)}</pre>` : `<div class="txt">${fmt(a)}</div>`}</div>`;
+  }
+
+  function afterHtml(correct, extra = "") {
+    const c = S.card;
+    return `<div class="verdict ${correct ? "right" : "wrong"}"><div class="h">${correct ? "Correct" : "Not quite — this card comes back later in the session"}</div>${extra}</div>
+      ${c.type !== "mc" || !correct ? modelAnswer(c) : ""}
+      ${c.explain ? `<div class="explain">${fmt(c.explain)}</div>` : ""}`;
+  }
+
+  function answer(correct, given) {
+    if (S.answered) return;
+    S.answered = true;
+    const c = S.card;
+    S.wasFirst = !S.first.has(c.id);
+    if (S.wasFirst) {
+      S.first.set(c.id, correct);
+      record(S.deck.id, c, correct, given);
+      if (!correct) S.log.push({ card: c, given });
+    }
+    if (correct) S.done++;
+    else S.queue.splice(Math.min(3, S.queue.length), 0, c);   // hard stop rule: it comes back until you get it
+  }
+
+  function continueBtn() {
+    $("#acts")?.remove();
+    $("#after").insertAdjacentHTML("afterend", `<div class="actions"><button class="btn primary" id="cont">Continue <kbd>Enter</kbd></button></div>`);
+    $("#cont").focus({ preventScroll: true });
+  }
+
+  function norm(s, cs) {
+    s = String(s).replace(/\s+/g, "").replace(/;+$/, "").replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+    return cs ? s : s.toLowerCase();
+  }
+
+  $("#qcard").addEventListener("click", e => {
+    const c = S && S.card; if (!c) return;
+    const ch = e.target.closest(".choice");
+    if (ch && !S.answered) return pickChoice(Number(ch.dataset.ci));
+    const id = e.target.closest("button")?.id;
+    if (id === "check") checkInput();
+    else if (id === "reveal") reveal();
+    else if (id === "missed" || id === "gotit") selfGrade(id === "gotit");
+    else if (id === "override") overrideWrong();
+    else if (id === "cont") next();
+  });
+
+  function pickChoice(ci) {
+    const c = S.card, ok = ci === c.answer;
+    answer(ok, c.choices[ci]);
+    $("#qcard").querySelectorAll(".choice").forEach(b => {
+      b.disabled = true;
+      const i = Number(b.dataset.ci);
+      if (i === c.answer) b.classList.add("right");
+      else if (i === ci) b.classList.add("wrong");
+    });
+    $("#after").innerHTML = afterHtml(ok);
+    continueBtn();
+  }
+
+  function checkInput() {
+    const c = S.card, given = $("#ans").value;
+    if (!given.trim()) return $("#ans").focus();
+    const ok = [c.answer, ...(c.accept || [])].some(a => norm(a, c.caseSensitive) === norm(given, c.caseSensitive));
+    $("#ans").readOnly = true;
+    S.before = cardProg(S.deck.id, c.id);
+    answer(ok, given);
+    $("#after").innerHTML = afterHtml(ok);
+    continueBtn();
+    if (!ok) $("#cont").insertAdjacentHTML("beforebegin", `<button class="btn" id="override">I was right</button>`);
+  }
+
+  // A typed answer was marked wrong but the student is sure it is equivalent: undo the miss.
+  function overrideWrong() {
+    const c = S.card;
+    S.queue.splice(S.queue.indexOf(c), 1);
+    S.done++;
+    if (S.wasFirst) {
+      S.log.pop();
+      S.first.set(c.id, true);
+      progress[S.deck.id][c.id] = S.before;
+      record(S.deck.id, c, true);
+    }
+    next();
+  }
+
+  function reveal() {
+    const c = S.card, given = $("#ans").value;
+    $("#ans").readOnly = true;
+    $("#acts").innerHTML = `<button class="btn bad" id="missed">Missed it <kbd>1</kbd></button><button class="btn good" id="gotit">Got it <kbd>2</kbd></button>`;
+    $("#after").innerHTML = modelAnswer(c) + (c.explain ? `<div class="explain">${fmt(c.explain)}</div>` : "");
+    $("#qhint").textContent = "Be strict: a missing capital letter or semicolon costs marks in the exam too. 1 = missed it, 2 = got it";
+    $("#gotit").focus({ preventScroll: true });
+  }
+
+  function selfGrade(ok) {
+    answer(ok, $("#ans").value);
+    next();
+  }
+
+  document.addEventListener("keydown", e => {
+    if (!S || $("#session").hidden || $("#importDlg").open) return;
+    const c = S.card, inField = e.target.matches("textarea, input");
+    if (e.key === "Enter" && $("#cont")) { e.preventDefault(); return next(); }
+    if (c.type === "mc" && !S.answered && /^[1-9]$/.test(e.key) && !inField) {
+      const k = Number(e.key) - 1;
+      if (k < S.order.length) { e.preventDefault(); pickChoice(S.order[k]); }
+      return;
+    }
+    if (c.type === "input" && e.key === "Enter" && !S.answered) { e.preventDefault(); return checkInput(); }
+    if (c.type === "write") {
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && $("#reveal")) { e.preventDefault(); return reveal(); }
+      if ($("#gotit") && (!inField || e.target.readOnly)) {
+        if (e.key === "1") { e.preventDefault(); selfGrade(false); }
+        else if (e.key === "2") { e.preventDefault(); selfGrade(true); }
+      }
+    }
+  });
+
+  $("#quitBtn").addEventListener("click", () => S.first.size ? finish() : home());
+
+  function finish() {
+    const n = S.first.size, right = [...S.first.values()].filter(Boolean).length;
+    const pct = n ? Math.round(right / n * 100) : 0;
+    $("#sumcard").innerHTML = `
+      <div class="tag">${esc(S.deck.title)}</div>
+      <div class="score">${right} / ${n}</div>
+      <p class="sub">right on the first try${n ? ` (${pct}%)` : ""}.${S.queue.length ? ` Ended early — ${S.queue.length} left in the queue.` : ""}</p>
+      ${S.log.length ? `<h3 style="margin:18px 0 0;font-size:17px">Missed first time</h3>
+        <ul class="missed">${S.log.map(({ card: c, given }) => `<li><div>${fmt(c.front)}</div><div class="a">${looksLikeCode(answerText(c)) ? `<pre>${esc(answerText(c))}</pre>` : "Answer: " + fmt(answerText(c))}</div></li>`).join("")}</ul>` : `<p>Clean run. Nothing to send back.</p>`}
+      <div class="row">
+        ${S.log.length ? `<button class="btn primary" id="copyReport">Copy report for Claude</button>` : ""}
+        <span class="grow"></span>
+        <button class="btn" id="again">Back to decks</button>
+      </div>`;
+    show("summary");
+  }
+
+  $("#sumcard").addEventListener("click", e => {
+    if (e.target.id === "copyReport") copy(sessionReport(), "Report copied — paste it into your Claude project");
+    if (e.target.id === "again") home();
+  });
+
+  /* ---------- reports for Claude ---------- */
+  function answerText(c) { return c.type === "mc" ? c.choices[c.answer] : c.answer; }
+  function cardLine(c, given, i) {
+    let s = `${i + 1}. ${c.unit ? `[${c.unit}] ` : ""}${c.front}`;
+    if (c.code) s += `\n   Code:\n${c.code.split("\n").map(l => "     " + l).join("\n")}`;
+    s += `\n   Correct answer: ${answerText(c).split("\n").join("\n     ")}`;
+    if (given && String(given).trim()) s += `\n   What I answered: ${String(given).trim().split("\n").join("\n     ")}`;
+    return s;
+  }
+  function sessionReport() {
+    const n = S.first.size, right = [...S.first.values()].filter(Boolean).length;
+    return `FLASHCARD REPORT — ${S.deck.module ? S.deck.module + " — " : ""}${S.deck.title} — ${new Date().toLocaleDateString()}
+Score: ${right}/${n} right on the first try.
+
+I missed these. For each one: explain WHY my answer was wrong in one or two lines, give me a puzzle-first example, then give me 2 new questions where I have to WRITE the code or term from scratch. Finish with a JSON flashcard deck (same deck id "${S.deck.id}", format from the project instructions) containing new cards for these weak spots.
+
+${S.log.map((l, i) => cardLine(l.card, l.given, i)).join("\n\n")}`;
+  }
+  function weakReport(deck) {
+    const rows = deck.cards.map(c => ({ c, p: cardProg(deck.id, c.id) })).filter(r => r.p.wrong > 0)
+      .sort((a, b) => (b.p.wrong - b.p.right) - (a.p.wrong - a.p.right)).slice(0, 15);
+    const s = deckStats(deck);
+    const byUnit = {};
+    deck.cards.forEach(c => { const p = cardProg(deck.id, c.id), u = c.unit || "No unit"; (byUnit[u] ||= { r: 0, w: 0 }); byUnit[u].r += p.right; byUnit[u].w += p.wrong; });
+    return `WEAK-SPOT REPORT — ${deck.module ? deck.module + " — " : ""}${deck.title} — ${new Date().toLocaleDateString()}
+Cards: ${s.total} total, ${s.mastered} locked in, ${s.learning} learning, ${s.due} due, ${s.fresh} never seen.
+Accuracy by unit: ${Object.entries(byUnit).map(([u, v]) => `${u} ${v.r + v.w ? Math.round(v.r / (v.r + v.w) * 100) + "%" : "not started"}`).join(", ")}
+
+${rows.length ? `These are the cards I get wrong most (wrong/right count in brackets). Tell me what pattern you see, re-teach the weakest topic first, and give me a new JSON flashcard deck (same deck id "${deck.id}") that drills these from different angles, with more "write" and "input" cards than "mc".
+
+${rows.map((r, i) => cardLine(r.c, r.p.lastWrong, i).replace(/^(\d+\. )/, `$1(${r.p.wrong}/${r.p.right}) `)).join("\n\n")}` : "No mistakes recorded yet."}`;
+  }
+
+  /* ---------- import ---------- */
+  const dlg = $("#importDlg");
+  $("#importBtn").addEventListener("click", () => { $("#importErr").textContent = ""; $("#importText").value = ""; dlg.showModal(); $("#importText").focus(); });
+  $("#importFile").addEventListener("change", async e => {
+    const f = e.target.files[0]; if (!f) return;
+    $("#importText").value = await f.text();
+    e.target.value = "";
+  });
+  $("#importForm").addEventListener("submit", e => {
+    if (e.submitter && e.submitter.value === "cancel") return;
+    e.preventDefault();
+    try {
+      const deck = parseDeckText($("#importText").value);
+      const existed = !!decks()[deck.id];
+      imported[deck.id] = deck;
+      save(KEY_DECKS, imported);
+      dlg.close();
+      renderHome();
+      toast(`${existed ? "Updated" : "Imported"} “${deck.title}” — ${deck.cards.length} cards`);
+    } catch (err) { $("#importErr").textContent = err.message; }
+  });
+
+  /* ---------- misc ---------- */
+  function show(id) { ["home", "session", "summary"].forEach(s => $("#" + s).hidden = s !== id); window.scrollTo({ top: 0 }); }
+  function home() { S = null; renderHome(); show("home"); }
+
+  let tt;
+  function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 2600); }
+
+  async function copy(text, msg) {
+    try { await navigator.clipboard.writeText(text); toast(msg); }
+    catch {
+      const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); toast(msg); } catch { prompt("Copy this:", text); }
+      ta.remove();
+    }
+  }
+
+  async function loadBuiltIn() {
+    try {
+      const idx = await (await fetch("decks/index.json", { cache: "no-cache" })).json();
+      const got = await Promise.all((idx.decks || []).map(f => fetch("decks/" + f, { cache: "no-cache" }).then(r => r.json()).then(normaliseDeck).catch(err => { console.warn("Deck", f, err); return null; })));
+      got.filter(Boolean).forEach(d => builtIn[d.id] = d);
+    } catch (err) {
+      console.warn("Built-in decks unavailable (opened from disk?)", err);
+    }
+    renderHome();
+  }
+
+  $("#copyInstr").addEventListener("click", async () => {
+    try {
+      const md = await (await fetch("CLAUDE_PROJECT.md", { cache: "no-cache" })).text();
+      const cut = md.indexOf("\n---\n");
+      copy(cut >= 0 ? md.slice(cut + 5).trim() : md, "Instructions copied — paste them into the Claude project");
+    } catch { toast("Couldn't load them here — open the link instead"); }
+  });
+
+  renderHome();
+  loadBuiltIn();
+})();
+</script>
+</body>
+</html>

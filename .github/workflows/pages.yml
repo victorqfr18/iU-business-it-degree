@@ -1,12 +1,14 @@
-# Publishes the Notes checklist site (notes-checklist/) to GitHub Pages.
-# Site URL: https://victorqfr18.github.io/iU-business-it-degree/
-name: Deploy Notes to GitHub Pages
+# Publishes the Notes checklist site (notes-checklist/) and the Flashcards app (flashcards/) to GitHub Pages.
+# Notes:      https://victorqfr18.github.io/iU-business-it-degree/
+# Flashcards: https://victorqfr18.github.io/iU-business-it-degree/flashcards/
+name: Deploy Notes and Flashcards to GitHub Pages
 
 on:
   push:
     branches: [main]
     paths:
       - "notes-checklist/**"
+      - "flashcards/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -30,8 +32,13 @@ jobs:
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp -r notes-checklist/. _site/
+          cp -r flashcards _site/flashcards
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: notes-checklist
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
