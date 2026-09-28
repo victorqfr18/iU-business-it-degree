@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Flashcards</title>
+<title>IU Flashcards</title>
 <meta name="description" content="Flashcard quiz for IU Business IT modules. Decks come from a Claude project; missed cards go back to Claude as a report.">
 <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
@@ -25,6 +25,7 @@
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
+      color-scheme: dark;
       --bg:#30302e; --bg2:#262624; --side:#1f1e1d; --text:#faf9f5; --text2:#c2c0b6; --text3:#9c9a92;
       --line:rgba(250,249,245,.12); --accent:#d97757; --accent-fg:#ffffff; --accent-soft:rgba(217,119,87,.18);
       --hover:rgba(255,255,255,.05); --field:rgba(255,255,255,.07); --code:#1f1e1d;
@@ -34,6 +35,7 @@
     }
   }
   :root[data-theme="dark"]{
+    color-scheme: dark;
     --bg:#30302e; --bg2:#262624; --side:#1f1e1d; --text:#faf9f5; --text2:#c2c0b6; --text3:#9c9a92;
     --line:rgba(250,249,245,.12); --accent:#d97757; --accent-fg:#ffffff; --accent-soft:rgba(217,119,87,.18);
     --hover:rgba(255,255,255,.05); --field:rgba(255,255,255,.07); --code:#1f1e1d;
@@ -152,6 +154,37 @@
   @media (max-width:420px){ .composer{padding-left:12px} .chip{padding:0 10px} .send{padding:0 12px} }
   .claude-ok{color:var(--good); font-weight:600}
   #session,#summary{max-width:720px}
+
+  /* ---------- Claude built in (only when the page runs on claude.ai) ---------- */
+  html:not(.ai) .ai-only{display:none !important}
+  html.ai .no-ai{display:none !important}
+  .send.icon{width:36px; padding:0; justify-content:center}
+  .job{display:flex; align-items:center; gap:12px; background:var(--accent-soft); border-radius:14px; padding:12px 14px; margin:-10px 0 22px; font-size:15px}
+  .job.err{background:var(--bad-soft); color:var(--bad)}
+  .job .grow{flex:1; min-width:0}
+  .spin{flex:none; width:18px; height:18px; border-radius:50%; border:2px solid var(--accent); border-right-color:transparent; animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .thinking{color:var(--text3); font-style:italic; margin:0}
+  @media (prefers-reduced-motion:reduce){ .spin{animation:none} }
+  .thread{margin:-6px 0 26px}
+  .thread .th{display:flex; align-items:center; gap:10px; margin-bottom:8px}
+  .thread .th h2{flex:1}
+  .thread .th button{font-size:13px; color:var(--text3)}
+  .msg{margin:0 0 14px}
+  .msg.me{display:flex; justify-content:flex-end}
+  .msg.me .bubble{max-width:85%; background:var(--field); border-radius:16px 16px 4px 16px; padding:9px 14px; white-space:pre-wrap; overflow-wrap:anywhere}
+  .aiout{font-size:16px; line-height:1.55; overflow-wrap:anywhere}
+  .aiout p{margin:0 0 10px} .aiout p:last-child{margin-bottom:0}
+  .aiout ul,.aiout ol{margin:0 0 10px; padding-left:22px}
+  .aiout h4{font-size:16px; margin:14px 0 6px}
+  .aiout pre{margin:8px 0 10px}
+  .msg .err,.aiout .err{color:var(--bad); font-size:14px; margin:6px 0 0}
+  .deckchip{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; border:1px solid var(--line); background:var(--bg); border-radius:12px; padding:10px 12px; margin:8px 0}
+  .deckchip .grow{flex:1; min-width:140px}
+  .deckchip small{color:var(--text3)}
+  .whybox{margin-top:12px}
+  .whybox .aiout{margin-top:10px; font-size:15px}
+  #modNotes{font-size:14px; min-height:140px}
   @media (max-width:1100px){ .cols{grid-template-columns:minmax(0,1fr)} }
 
   /* session */
@@ -225,7 +258,7 @@
   <button class="newbtn" id="addMod"><span class="plus"><svg width="12" height="12" viewBox="0 0 12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 1.5v9M1.5 6h9"/></svg></span>New module</button>
   <div class="slabel">Modules</div>
   <nav class="slist" id="modlist"></nav>
-  <div class="sfoot">Saved in this browser</div>
+  <div class="sfoot" id="saveNote">Saved in this browser</div>
 </aside>
 <div class="scrim" id="scrim"></div>
 <main class="main">
@@ -245,7 +278,17 @@
       </div>
       <aside>
         <div class="card panel" id="modinfo"></div>
-        <div class="card howto">
+        <div class="card howto ai-only">
+          <b style="color:var(--text)">Claude is built in</b>
+          <ol>
+            <li><b>Make cards</b> writes a deck on the topic you type, from this module's course notes.</li>
+            <li><b>Send</b> asks Claude about the module. Ask it for a quiz and you get a deck you can add in one tap.</li>
+            <li>In a quiz, <b>Ask Claude why</b> explains a miss, and <b>Grade with Claude</b> marks written answers.</li>
+            <li>After a session, <b>Make a follow-up deck</b> turns your mistakes into new cards.</li>
+          </ol>
+          <p class="note">Uses your Claude plan. Your decks and progress are saved to your claude.ai account.</p>
+        </div>
+        <div class="card howto no-ai">
       <b style="color:var(--text)">Set up the link to Claude (once per project)</b>
       <ol>
         <li><button class="btn ghost small" id="copyInstr" style="padding:0;min-height:0;display:inline">Copy the Claude instructions</button> and paste them into your Claude project's custom instructions (<a href="https://github.com/victorqfr18/iU-business-it-degree/blob/main/flashcards/CLAUDE_PROJECT.md">read them</a>).</li>
@@ -297,7 +340,13 @@
     <h3 id="modTitle">Module</h3>
     <label class="field"><span>Module code</span><input type="text" id="modCode" required autocapitalize="characters" autocomplete="off" placeholder="DLBCSDSJCL01"></label>
     <label class="field"><span>Module name</span><input type="text" id="modName" autocomplete="off" placeholder="Data Structures and Java Class Library"></label>
-    <label class="field"><span>Claude project link</span><input type="text" id="modClaude" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://claude.ai/project/…"></label>
+    <label class="field ai-only"><span>Course notes <b id="notesCount" style="font-weight:500"></b></span>
+      <textarea id="modNotes" rows="6" spellcheck="false" placeholder="Paste unit summaries, slide text or your own notes. Claude writes cards and answers from these."></textarea></label>
+    <div class="row ai-only" style="margin-top:8px">
+      <label class="btn small" style="cursor:pointer">Add file (.pdf, .txt, .md)<input type="file" id="notesFile" accept=".pdf,.txt,.md,.markdown,application/pdf,text/plain,text/markdown" multiple hidden></label>
+      <span class="note" id="notesStatus" style="margin:0"></span>
+    </div>
+    <label class="field no-ai"><span>Claude project link</span><input type="text" id="modClaude" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://claude.ai/project/…"></label>
     <div class="err" id="modErr"></div>
     <div class="row">
       <button class="btn small bad" type="button" id="modDelete">Delete module</button>
@@ -308,6 +357,26 @@
   </form>
 </dialog>
 
+<dialog id="askDlg">
+  <form method="dialog" class="in">
+    <h3 id="askTitle">Are you sure?</h3>
+    <p id="askMsg"></p>
+    <div class="row"><span class="grow"></span>
+      <button class="btn small" value="no">Cancel</button>
+      <button class="btn small bad" value="yes" id="askOk">Delete</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="copyDlg">
+  <form method="dialog" class="in">
+    <h3>Copy this</h3>
+    <p>Your browser didn't allow copying automatically. Select the text, copy it, and paste it into Claude.</p>
+    <textarea id="copyText" readonly spellcheck="false"></textarea>
+    <div class="row"><span class="grow"></span><button class="btn small primary" value="close">Done</button></div>
+  </form>
+</dialog>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -315,9 +384,78 @@
   "use strict";
 
   /* ---------- storage ---------- */
-  const KEY_DECKS = "fq.importedDecks.v1", KEY_PROG = "fq.progress.v1", KEY_PREF = "fq.prefs.v1", KEY_MODS = "fq.modules.v1";
+  const KEY_DECKS = "fq.importedDecks.v1", KEY_PROG = "fq.progress.v1", KEY_PREF = "fq.prefs.v1", KEY_MODS = "fq.modules.v1",
+        KEY_NOTES = "fq.notes.v1", KEY_CHAT = "fq.chats.v1";
   const load = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
-  const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { toast("Could not save — browser storage is off or full"); } };
+  // Saves go to this browser, and to the viewer's claude.ai account when the page runs there (see Sync).
+  const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage off: the account copy still saves */ } Sync.mark(k); };
+
+  /* ---------- sync to the viewer's claude.ai account ----------
+     When this page runs as a claude.ai artifact, everything is also kept in the
+     viewer's private db subtree (data/users/<id>/app + subcollections), so it
+     follows them between devices. Elsewhere it is browser-only. */
+  const Sync = {
+    ref: null, dirty: new Set(), last: new Map(), timer: 0, busy: false, warned: false,
+    mark(k) { if (!this.ref) return; this.dirty.add(k); clearTimeout(this.timer); this.timer = setTimeout(() => this.flush(), 800); },
+    sid: id => String(id).replace(/[^A-Za-z0-9_\-.~:@+]/g, "_").replace(/^\.+$/, "_").slice(0, 180) || "_",
+    // collection name -> the in-memory object it mirrors, keyed by id
+    colls: () => ({ decks: [KEY_DECKS, imported], progress: [KEY_PROG, progress], notes: [KEY_NOTES, notes], chats: [KEY_CHAT, chats] }),
+    async write(ref, body) {
+      const json = JSON.stringify(body);
+      if (this.last.get(ref.path) === json) return;
+      await ref.set(body); this.last.set(ref.path, json);
+    },
+    async flush() {
+      if (this.busy) { this.timer = setTimeout(() => this.flush(), 800); return; }
+      this.busy = true;
+      const keys = [...this.dirty]; this.dirty.clear();
+      try {
+        if (keys.includes(KEY_MODS) || keys.includes(KEY_PREF)) await this.write(this.ref, { modules, prefs });
+        for (const [name, [key, obj]] of Object.entries(this.colls())) {
+          if (!keys.includes(key)) continue;
+          const col = this.ref.collection(name), ids = new Set();
+          for (const [id, val] of Object.entries(obj)) { ids.add(this.sid(id)); await this.write(col.doc(this.sid(id)), { id, val }); }
+          for (const path of [...this.last.keys()]) {
+            const pre = col.path + "/";
+            if (path.startsWith(pre) && !ids.has(path.slice(pre.length))) { await col.doc(path.slice(pre.length)).delete(); this.last.delete(path); }
+          }
+        }
+      } catch (e) {
+        console.warn("Sync failed", e);
+        keys.forEach(k => this.dirty.add(k));
+        if (!this.warned) { this.warned = true; toast("Couldn't save to your Claude account. Saved in this browser."); }
+      } finally { this.busy = false; }
+    },
+    async start() {
+      if (!window.claude?.use) return;
+      const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+      const uid = db && user ? await user.id().catch(() => null) : null;
+      if (!uid) return;
+      const ref = db.doc(`data/users/${uid}/app`);
+      try {
+        const snap = await ref.get();
+        if (!snap.exists) {                 // first visit on this account: upload what this browser has
+          this.ref = ref;
+          [KEY_MODS, ...Object.values(this.colls()).map(([k]) => k)].forEach(k => this.mark(k));
+          return;
+        }
+        const top = structuredClone(snap.data());   // snapshots are frozen; the app mutates its state
+        if (Array.isArray(top.modules)) modules = top.modules;
+        if (top.prefs) prefs = { ...prefs, ...top.prefs };
+        this.last.set(ref.path, JSON.stringify(top));
+        for (const [name, [key, obj]] of Object.entries(this.colls())) {
+          const q = await ref.collection(name).get();
+          for (const k of Object.keys(obj)) delete obj[k];
+          for (const d of q.docs) { const b = structuredClone(d.data()); obj[b.id] = b.val; this.last.set(`${ref.path}/${name}/${d.id}`, JSON.stringify(b)); }
+          try { localStorage.setItem(key, JSON.stringify(obj)); } catch {}
+        }
+        try { localStorage.setItem(KEY_MODS, JSON.stringify(modules)); localStorage.setItem(KEY_PREF, JSON.stringify(prefs)); } catch {}
+        this.ref = ref;
+        app.classList.toggle("collapsed", !!prefs.collapsed);
+        if (!S) renderHome();
+      } catch (e) { console.warn("Sync unavailable", e); }
+    },
+  };
 
   let builtIn = {};                          // id -> deck, from decks/
   let imported = load(KEY_DECKS, {});        // id -> deck, pasted by the user
@@ -326,6 +464,8 @@
   // Module tabs: {id, code, name, claude (project URL), topic (what I'm studying now)}
   let modules = load(KEY_MODS, null) || [{ id: "m" + Date.now().toString(36), code: "DLBCSDSJCL01", name: "Data Structures and Java Class Library", claude: "", topic: "" }];
   const OTHER = "__other";
+  let notes = load(KEY_NOTES, {});            // module id -> course notes text (fed to Claude)
+  let chats = load(KEY_CHAT, {});             // module id -> [{role, content, added?}]
 
   const DAY = 864e5;
   const INTERVALS = [0, 0, 1, 3, 7, 16, 35];   // days until due, by box (1..6). Box 0 = new.
@@ -457,7 +597,8 @@
       || `<p class="sfoot" style="border:0">No modules yet.</p>`;
     const m = activeMod();
     $("#topTitle").textContent = m ? (m.name || m.code) : act === OTHER ? "Other decks" : "Flashcards";
-    document.title = m ? `${m.code} · Flashcards` : "Flashcards";
+    document.title = m ? `${m.code} · IU Flashcards` : "IU Flashcards";
+    $("#saveNote").textContent = Sync.ref ? "Saved to your claude.ai account" : "Saved in this browser";
   }
 
   function renderModPanel() {
@@ -478,21 +619,39 @@
         <button class="btn small" id="editMod">Edit</button>
       </div>
       <div class="composer">
-        <textarea id="topic" rows="2" placeholder="What are you studying right now?" aria-label="What are you studying right now?">${esc(m.topic || "")}</textarea>
+        <textarea id="topic" rows="2" placeholder="What are you studying right now?" aria-label="Message"
+          data-ai-placeholder="Ask Claude about ${esc(m.code)}, or type a topic and press Make cards">${esc(m.topic || "")}</textarea>
         <div class="crow">
-          <button class="chip" id="pasteDeck" title="Import the deck Claude sent (from the clipboard)">
+          <button class="chip no-ai" id="pasteDeck" title="Import the deck Claude sent (from the clipboard)">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="2.5" width="10" height="12" rx="2"/><path d="M6 2.5h4v2H6z"/></svg>Paste deck</button>
           <button class="chip" id="importBtn" title="Import a .json deck file">Import</button>
           <span class="grow"></span>
-          <button class="send" id="askClaude" title="Copy a prompt and open your Claude project">Get cards
+          <button class="send no-ai" id="askClaude" title="Copy a prompt and open your Claude project">Get cards
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l6-6M5 4h5v5"/></svg></button>
+          <button class="chip ai-only" id="makeCards" ${JOB ? "disabled" : ""}>Make cards</button>
+          <button class="send icon ai-only" id="sendChat" aria-label="Send to Claude" title="Send to Claude" ${CHAT ? "disabled" : ""}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/></svg></button>
         </div>
-      </div>`;
+    </div>`;
+    host.insertAdjacentHTML("beforeend", `<div id="job"></div><div id="thread" class="thread"></div>`);
+    const ta = $("#topic");
+    if (AI) ta.placeholder = ta.dataset.aiPlaceholder;
+    renderJob(); renderThread();
+    const nlen = (notes[m.id] || "").length;
     info.innerHTML = `
+      <div class="ai-only">
+        <h3>Claude</h3>
+        <p><span class="claude-ok">✓ Built in.</span> Cards and answers come straight from Claude on your plan.</p>
+        <h3 style="margin-top:14px">Course notes</h3>
+        <p>${nlen ? `${nlen.toLocaleString()} characters. Claude bases cards and answers on them.` : "None yet. Add your notes or the course book PDF so Claude sticks to your syllabus."}</p>
+        <button class="btn small ${nlen ? "" : "primary"}" id="editNotes">${nlen ? "Edit notes" : "Add course notes"}</button>
+      </div>
+      <div class="no-ai">
       <h3>Claude project</h3>
       ${link
         ? `<p><span class="claude-ok">✓ Linked.</span> <b>Get cards</b> and the reports open <a href="${esc(link)}" target="_blank" rel="noopener">your project</a>.</p>`
         : `<p>Not linked yet. Add the project's address so <b>Get cards</b> opens it directly.</p><button class="btn small primary" id="linkMod">Add Claude project link</button>`}
+      </div>
       <h3 style="margin-top:14px">Module code</h3>
       <p>${esc(m.code)} · ${decksIn(m.id).length} deck${decksIn(m.id).length === 1 ? "" : "s"}</p>
       <button class="btn small" id="editMod2">Edit module</button>`;
@@ -530,7 +689,8 @@
           ${us.length > 1 ? `<select data-act="unit" aria-label="Filter by unit"><option value="">All units</option>${us.map(u => `<option ${u === unitSel ? "selected" : ""}>${esc(u)}</option>`).join("")}</select>` : ""}
         </div>
         <div class="deckfoot">
-          <button data-act="report">Send weak-spot report to Claude</button>
+          <button data-act="report" class="no-ai">Send weak-spot report to Claude</button>
+          <button data-act="weakcards" class="ai-only">New cards for my weak spots</button>
           <button data-act="reset">Reset progress</button>
           ${imported[d.id] ? `<button data-act="delete" class="danger">Delete deck</button>` : ""}
           <span class="grow"></span>
@@ -559,8 +719,20 @@
   });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && app.classList.contains("open")) closeSide(); });
 
-  $("#modpanel").addEventListener("click", e => {
-    const id = e.target.closest("button")?.id, m = activeMod();
+  $("#modpanel").addEventListener("click", async e => {
+    const btn = e.target.closest("button"), id = btn?.id, m = activeMod();
+    if (!btn) return;
+    if (btn.dataset.add != null) {                       // "Add to module" on a deck Claude wrote in the chat
+      const t = chats[m.id][Number(btn.dataset.add)], deck = chatDeck(t.content);
+      if (deck) { deck.module = m.code; t.added = true; save(KEY_CHAT, chats); importDeck(deck); }
+      return;
+    }
+    if (id === "makeCards") { const topic = $("#topic").value.trim(); return makeCards(m, topic); }
+    if (id === "sendChat") { const text = $("#topic").value.trim(); if (!text) return $("#topic").focus(); $("#topic").value = ""; m.topic = ""; saveMods(); return sendChat(m, text); }
+    if (id === "stopJob") return JOB?.ctl.abort();
+    if (id === "dismissJob") { JOB_ERR = null; return renderJob(); }
+    if (id === "stopChat") return CHAT?.ctl.abort();
+    if (id === "clearChat") { if (await ask("Clear this chat?", "The conversation with Claude for this module is deleted. Your decks stay.", "Clear")) { chats[m.id] = []; save(KEY_CHAT, chats); renderThread(); } return; }
     if (id === "addMod2") editModule(null);
     else if (id === "editMod") editModule(m);
     else if (id === "importBtn") openImport("");
@@ -578,12 +750,13 @@ Base it on the course material in this project. Use the flashcard JSON format fr
   });
   // Enter sends, like the Claude composer; Shift+Enter makes a new line.
   $("#modpanel").addEventListener("keydown", e => {
-    if (e.target.id === "topic" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("#askClaude").click(); }
+    if (e.target.id === "topic" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); (AI ? $("#sendChat") : $("#askClaude")).click(); }
   });
   $("#modinfo").addEventListener("click", e => {
     const id = e.target.closest("button")?.id;
     if (id === "linkMod") editModule(activeMod(), true);
     else if (id === "editMod2") editModule(activeMod());
+    else if (id === "editNotes") { editModule(activeMod()); $("#modNotes").focus(); }
   });
 
   /* Copy text, then open the module's Claude project (if linked) so it can be pasted straight into a chat. */
@@ -596,7 +769,7 @@ Base it on the course material in this project. Use the flashcard JSON format fr
     } else {
       toast(copied ? `${what}. Add the Claude project link (Edit) to open it directly next time.` : "Couldn't copy automatically");
     }
-    if (!copied) prompt("Copy this and paste it into Claude:", text);
+    if (!copied) showCopy(text);
   }
 
   async function pasteDeck() {
@@ -616,6 +789,9 @@ Base it on the course material in this project. Use the flashcard JSON format fr
     $("#modCode").value = m?.code || "";
     $("#modName").value = m?.name || "";
     $("#modClaude").value = m?.claude || "";
+    $("#modNotes").value = (m && notes[m.id]) || "";
+    $("#notesStatus").textContent = "";
+    countNotes();
     $("#modErr").textContent = "";
     $("#modDelete").hidden = !m;
     mdlg.showModal();
@@ -635,32 +811,93 @@ Base it on the course material in this project. Use the flashcard JSON format fr
         save(KEY_DECKS, imported);
       }
       Object.assign(editing, { code, name, claude: link });
+      setNotes(editing.id);
     } else {
       const m = { id: "m" + Date.now().toString(36), code, name, claude: link, topic: "" };
       modules.push(m);
+      setNotes(m.id);
       prefs.active = m.id; save(KEY_PREF, prefs);
     }
     saveMods(); mdlg.close(); renderHome();
   });
-  $("#modDelete").addEventListener("click", () => {
+  function setNotes(id) {
+    const v = $("#modNotes").value.trim().slice(0, NOTES_MAX);
+    if (v) notes[id] = v; else delete notes[id];
+    save(KEY_NOTES, notes);
+  }
+  function countNotes() {
+    const n = $("#modNotes").value.length;
+    $("#notesCount").textContent = n ? `· ${n.toLocaleString()} / ${NOTES_MAX.toLocaleString()} characters` : "";
+  }
+  $("#modNotes").addEventListener("input", countNotes);
+  $("#notesFile").addEventListener("change", async e => {
+    const files = [...e.target.files]; e.target.value = "";
+    const status = $("#notesStatus"), box = $("#modNotes");
+    for (const f of files) {
+      try {
+        status.textContent = `Reading ${f.name}…`;
+        const text = /\.pdf$/i.test(f.name) || f.type === "application/pdf"
+          ? await pdfText(f, (i, n) => { status.textContent = `Reading ${f.name}: page ${i} of ${n}`; })
+          : await f.text();
+        box.value = (box.value.trim() ? box.value.trim() + "\n\n" : "") + `# ${f.name}\n` + text.trim();
+        status.textContent = box.value.length > NOTES_MAX ? `Added ${f.name}. Only the first ${NOTES_MAX.toLocaleString()} characters are kept.` : `Added ${f.name}.`;
+      } catch (err) { status.textContent = `Couldn't read ${f.name}: ${err.message || err}`; }
+      countNotes();
+    }
+  });
+
+  // PDF text extraction with pdf.js, loaded only when a PDF is added.
+  const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+  let pdfjsReady = null;
+  function loadPdfJs() {
+    return pdfjsReady ||= new Promise((res, rej) => {
+      const sc = document.createElement("script");
+      sc.src = PDFJS + "pdf.min.js";
+      sc.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js"; res(window.pdfjsLib); };
+      sc.onerror = () => { pdfjsReady = null; rej(new Error("the PDF reader didn't load. Check your connection, or paste the text instead.")); };
+      document.head.appendChild(sc);
+    });
+  }
+  async function pdfText(file, onPage) {
+    const lib = await loadPdfJs();
+    const doc = await lib.getDocument({ data: await file.arrayBuffer() }).promise;
+    let out = "";
+    for (let i = 1; i <= doc.numPages && out.length < NOTES_MAX; i++) {
+      const tc = await (await doc.getPage(i)).getTextContent();
+      out += tc.items.map(it => it.str + (it.hasEOL ? "\n" : " ")).join("") + "\n\n";
+      onPage?.(i, doc.numPages);
+    }
+    if (!out.trim()) throw new Error("no text found (a scanned PDF?). Paste the text instead.");
+    return out.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n");
+  }
+
+  $("#modDelete").addEventListener("click", async () => {
     const m = editing, mine = Object.values(imported).filter(d => modKey(d.module) === modKey(m.code));
-    if (!confirm(`Delete the ${m.code} tab${mine.length ? ` and its ${mine.length} imported deck${mine.length > 1 ? "s" : ""} (with progress)` : ""}?`)) return;
+    if (!await ask(`Delete ${m.code}?`, mine.length ? `Its ${mine.length} imported deck${mine.length > 1 ? "s" : ""}, your progress on them, its chat and course notes are deleted too.` : "Its chat and course notes are deleted too.")) return;
+    delete notes[m.id]; delete chats[m.id]; save(KEY_NOTES, notes); save(KEY_CHAT, chats);
     mine.forEach(d => { delete imported[d.id]; delete progress[d.id]; });
     modules = modules.filter(x => x !== m);
     save(KEY_DECKS, imported); save(KEY_PROG, progress); saveMods();
     mdlg.close(); renderHome();
   });
 
-  $("#decks").addEventListener("click", e => {
+  $("#decks").addEventListener("click", async e => {
     const b = e.target.closest("button[data-act]"); if (!b) return;
     const deck = decks()[b.closest("[data-id]").dataset.id];
     const act = b.dataset.act;
     if (act === "study" || act === "weak" || act === "all") startSession(deck, act);
     else if (act === "report") sendToClaude(weakReport(deck), moduleOf(deck), "Report copied");
+    else if (act === "weakcards") {
+      const rows = mistakeLines(deck.cards.map(c => ({ card: c, p: cardProg(deck.id, c.id) })).filter(r => r.p.wrong > 0)
+        .sort((a, b) => (b.p.wrong - b.p.right) - (a.p.wrong - a.p.right)).slice(0, 15).map(r => ({ card: r.card, given: r.p.lastWrong })));
+      if (!rows) return toast("No mistakes recorded in this deck yet.");
+      makeCards(moduleOf(deck) || activeMod(), "", `Build the deck around these cards the student keeps getting wrong. Attack each misunderstanding from new angles, with more "write" and "input" cards than "mc":\n${rows}`, "your weak spots");
+      window.scrollTo({ top: 0 });
+    }
     else if (act === "reset") {
-      if (confirm(`Reset all progress for "${deck.title}"?`)) { delete progress[deck.id]; save(KEY_PROG, progress); renderHome(); }
+      if (await ask("Reset progress?", `Every card in “${deck.title}” goes back to new.`, "Reset")) { delete progress[deck.id]; save(KEY_PROG, progress); renderHome(); }
     } else if (act === "delete") {
-      if (confirm(`Delete "${deck.title}" and its progress?`)) { delete imported[deck.id]; delete progress[deck.id]; save(KEY_DECKS, imported); save(KEY_PROG, progress); renderHome(); }
+      if (await ask("Delete this deck?", `“${deck.title}” and your progress on it are removed.`)) { delete imported[deck.id]; delete progress[deck.id]; save(KEY_DECKS, imported); save(KEY_PROG, progress); renderHome(); }
     }
   });
   $("#decks").addEventListener("change", e => {
@@ -722,7 +959,7 @@ Base it on the course material in this project. Use the flashcard JSON format fr
       $("#qhint").textContent = "Enter to check";
     } else {
       html += `<div class="answerbox"><label for="ans">Write it on paper or here, then reveal. Don't peek.</label><textarea id="ans" class="${looksLikeCode(c.answer) ? "code" : ""}" rows="${looksLikeCode(c.answer) ? 7 : 3}" spellcheck="false" autocapitalize="off"></textarea></div><div id="after"></div>
-        <div class="actions" id="acts"><button class="btn primary" id="reveal">Show answer <kbd>${isMac ? "⌘" : "Ctrl"}↵</kbd></button></div>`;
+        <div class="actions" id="acts"><button class="btn ai-only" id="grade">Grade with Claude</button><button class="btn primary" id="reveal">Show answer <kbd>${isMac ? "⌘" : "Ctrl"}↵</kbd></button></div>`;
       $("#qhint").textContent = `${isMac ? "⌘" : "Ctrl"}+Enter to reveal, then 1 = missed it, 2 = got it`;
     }
     q.innerHTML = html;
@@ -742,13 +979,15 @@ Base it on the course material in this project. Use the flashcard JSON format fr
     const c = S.card;
     return `<div class="verdict ${correct ? "right" : "wrong"}"><div class="h">${correct ? "Correct" : "Not quite — this card comes back later in the session"}</div>${extra}</div>
       ${c.type !== "mc" || !correct ? modelAnswer(c) : ""}
-      ${c.explain ? `<div class="explain">${fmt(c.explain)}</div>` : ""}`;
+      ${c.explain ? `<div class="explain">${fmt(c.explain)}</div>` : ""}
+      ${correct ? "" : `<div class="whybox ai-only"><button class="btn small" id="why">Ask Claude why</button><div id="whyOut" class="aiout"></div></div>`}`;
   }
 
   function answer(correct, given) {
     if (S.answered) return;
     S.answered = true;
     const c = S.card;
+    S.lastGiven = given;
     S.wasFirst = !S.first.has(c.id);
     if (S.wasFirst) {
       S.first.set(c.id, correct);
@@ -779,6 +1018,8 @@ Base it on the course material in this project. Use the flashcard JSON format fr
     else if (id === "reveal") reveal();
     else if (id === "missed" || id === "gotit") selfGrade(id === "gotit");
     else if (id === "override") overrideWrong();
+    else if (id === "why") explainMiss();
+    else if (id === "grade") gradeWrite();
     else if (id === "cont") next();
   });
 
@@ -821,13 +1062,64 @@ Base it on the course material in this project. Use the flashcard JSON format fr
     next();
   }
 
-  function reveal() {
-    const c = S.card, given = $("#ans").value;
+  function reveal(suggestGot = true) {
+    const c = S.card;
     $("#ans").readOnly = true;
     $("#acts").innerHTML = `<button class="btn bad" id="missed">Missed it <kbd>1</kbd></button><button class="btn good" id="gotit">Got it <kbd>2</kbd></button>`;
     $("#after").innerHTML = modelAnswer(c) + (c.explain ? `<div class="explain">${fmt(c.explain)}</div>` : "");
     $("#qhint").textContent = "Be strict: a missing capital letter or semicolon costs marks in the exam too. 1 = missed it, 2 = got it";
-    $("#gotit").focus({ preventScroll: true });
+    $(suggestGot ? "#gotit" : "#missed").focus({ preventScroll: true });
+  }
+
+  function cardPrompt(c) {
+    return `Question: ${c.front}${c.code ? `\nCode:\n${c.code}` : ""}${c.type === "mc" ? `\nOptions: ${c.choices.join(" | ")}` : ""}`;
+  }
+
+  // After a miss: Claude explains the misunderstanding behind this particular wrong answer.
+  async function explainMiss() {
+    const c = S.card, out = $("#whyOut"), btn = $("#why"), m = moduleOf(S.deck);
+    btn.disabled = true;
+    out.innerHTML = `<p class="thinking">Thinking…</p>`;
+    const prompt = `A student preparing for a university exam${m ? ` (${m.code}${m.name ? " " + m.name : ""})` : ""} got this flashcard wrong.
+${cardPrompt(c)}
+Correct answer: ${answerText(c)}
+Student's answer: ${S.lastGiven || "(blank)"}
+${c.explain ? `Card note: ${c.explain}` : ""}
+In at most 5 short sentences: name the misunderstanding the student's answer shows, say why the correct answer is right, and give one memory hook. Add a tiny code example only if it helps. Markdown, no heading.`;
+    try {
+      await AI(prompt, { modelTier: "quick", onText: ({ text }) => { out.innerHTML = md(text); } });
+      btn.remove();
+    } catch (e) {
+      out.innerHTML = e.text ? md(e.text) : "";
+      const msg = aiError(e);
+      if (msg) out.insertAdjacentHTML("beforeend", `<p class="err">${esc(msg)}</p>`);
+      btn.disabled = false;
+    }
+  }
+
+  // Written answers: Claude marks them like an exam marker, then the student confirms.
+  async function gradeWrite() {
+    const sess = S, c = S.card, given = $("#ans").value.trim();
+    if (!given) return $("#ans").focus();
+    $("#ans").readOnly = true;
+    $("#acts").innerHTML = `<p class="thinking">Claude is marking your answer…</p>`;
+    let v, err = "";
+    try {
+      v = await AI.json(`Mark a university student's exam answer, written from memory, as strictly as an exam marker would: wrong syntax, a primitive where a wrapper class is needed, a missing requirement or a missing assignment counts. Ignore formatting and variable names that don't change the meaning.
+${cardPrompt(c)}
+Model answer:
+${c.answer}
+${c.explain ? `Marker's note: ${c.explain}` : ""}
+Student's answer:
+${given}
+Reply with only JSON: {"verdict": "correct" | "partly" | "wrong", "feedback": "1-3 sentences on what is wrong or missing, quoting the exact fix; for a correct answer, one sentence of confirmation"}`, { modelTier: "quick", cache: false });
+    } catch (e) { err = aiError(e); }
+    if (S !== sess || S.card !== c) return;          // moved on while Claude was marking
+    const verdict = ["correct", "partly", "wrong"].includes(v?.verdict) ? v.verdict : null;
+    reveal(verdict === "correct");
+    $("#after").insertAdjacentHTML("afterbegin", verdict
+      ? `<div class="verdict ${verdict === "correct" ? "right" : "wrong"}"><div class="h">${{ correct: "Claude: correct", partly: "Claude: partly right", wrong: "Claude: not yet" }[verdict]}</div><div class="aiout">${md(String(v.feedback || ""))}</div></div>`
+      : err ? `<p class="err">${esc(err)}</p>` : "");
   }
 
   function selfGrade(ok) {
@@ -865,8 +1157,11 @@ Base it on the course material in this project. Use the flashcard JSON format fr
       <p class="sub">right on the first try${n ? ` (${pct}%)` : ""}.${S.queue.length ? ` Ended early — ${S.queue.length} left in the queue.` : ""}</p>
       ${S.log.length ? `<h3 style="margin:18px 0 0;font-size:17px">Missed first time</h3>
         <ul class="missed">${S.log.map(({ card: c, given }) => `<li><div>${fmt(c.front)}</div><div class="a">${looksLikeCode(answerText(c)) ? `<pre>${esc(answerText(c))}</pre>` : "Answer: " + fmt(answerText(c))}</div></li>`).join("")}</ul>` : `<p>Clean run. Nothing to send back.</p>`}
+      <div id="sumAi" class="aiout" style="margin-top:14px"></div>
       <div class="row">
-        ${S.log.length ? `<button class="btn primary" id="copyReport">Send report to Claude ↗</button>` : ""}
+        ${S.log.length ? `<button class="btn primary no-ai" id="copyReport">Send report to Claude ↗</button>
+          <button class="btn primary ai-only" id="followUp">Make a follow-up deck</button>
+          <button class="btn ai-only" id="explainAll">Explain my mistakes</button>` : ""}
         <span class="grow"></span>
         <button class="btn" id="again">Back to decks</button>
       </div>`;
@@ -876,9 +1171,35 @@ Base it on the course material in this project. Use the flashcard JSON format fr
   $("#sumcard").addEventListener("click", e => {
     if (e.target.id === "copyReport") sendToClaude(sessionReport(), moduleOf(S.deck), "Report copied");
     if (e.target.id === "again") home();
+    if (e.target.id === "followUp") {
+      const m = moduleOf(S.deck) || activeMod(), rows = mistakeLines(S.log);
+      if (m) prefs.active = m.id;
+      home();
+      makeCards(m, "", `Build the deck around the mistakes below from the student's last session. Attack each misunderstanding from new angles, with more "write" and "input" cards than "mc":\n${rows}`, "your mistakes");
+    }
+    if (e.target.id === "explainAll") explainAll(e.target);
   });
 
   /* ---------- reports for Claude ---------- */
+  function mistakeLines(log) { return log.map((l, i) => cardLine(l.card, l.given, i)).join("\n\n"); }
+
+  async function explainAll(btn) {
+    const out = $("#sumAi"), m = moduleOf(S.deck);
+    btn.disabled = true;
+    out.innerHTML = `<p class="thinking">Thinking…</p>`;
+    try {
+      await AI(`A university student${m ? ` studying ${m.code}${m.name ? " " + m.name : ""}` : ""} just finished a flashcard session and missed the cards below. For each one, in 2-3 sentences: the misunderstanding behind their answer and how to fix it. Then end with a short "Pattern" paragraph naming what the mistakes have in common and what to practise next. Markdown, one "####" heading per card.
+
+${mistakeLines(S.log)}`, { onText: ({ text }) => { out.innerHTML = md(text); } });
+      btn.remove();
+    } catch (e) {
+      out.innerHTML = e.text ? md(e.text) : "";
+      const msg = aiError(e);
+      if (msg) out.insertAdjacentHTML("beforeend", `<p class="err">${esc(msg)}</p>`);
+      btn.disabled = false;
+    }
+  }
+
   function answerText(c) { return c.type === "mc" ? c.choices[c.answer] : c.answer; }
   function cardLine(c, given, i) {
     let s = `${i + 1}. ${c.unit ? `[${c.unit}] ` : ""}${c.front}`;
@@ -940,6 +1261,218 @@ ${rows.map((r, i) => cardLine(r.c, r.p.lastWrong, i).replace(/^(\d+\. )/, `$1(${
     } catch (err) { $("#importErr").textContent = err.message; }
   });
 
+  /* ---------- Claude, built in ----------
+     On claude.ai the page can ask Claude directly (the `sample` capability, on the
+     viewer's own plan). Everywhere else AI stays null and the copy/paste flow is used. */
+  let AI = null, JOB = null, JOB_ERR = null, CHAT = null;
+  const NOTES_MAX = 150000;
+  const setAI = fn => { AI = fn; document.documentElement.classList.toggle("ai", !!fn); };
+  async function startAI() {
+    if (!window.claude?.use) return;
+    const fn = await claude.use("sample").catch(() => null);
+    if (fn) { setAI(fn); if (!S) renderHome(); }
+  }
+  // What to tell the viewer for each failure. Codes that mean "not on this page" switch the AI features off.
+  function aiError(e) {
+    const code = e?.code || "upstream_error";
+    if (code === "cancelled") return "";
+    if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(code)) {
+      setAI(null);
+      setTimeout(() => { if (!S) renderHome(); });
+      return "Claude isn't available on this page, so the app is back to copy and paste.";
+    }
+    return {
+      rate_limited: "You've reached your Claude usage limit for now. Try again later.",
+      session_expired: "Your claude.ai sign-in expired. Sign in again, then reload.",
+      refused: "Claude declined that request. Try wording it differently.",
+      invalid_json: "Claude's reply wasn't a usable deck. Press Make cards again.",
+      prompt_too_large: "Too much text for one request. Shorten this module's course notes.",
+      empty_completion: "Claude didn't answer. Ask for less at once.",
+    }[code] || "Couldn't reach Claude. Try again.";
+  }
+
+  // Small Markdown renderer for Claude's answers: code fences, lists, headings, `code`, **bold**, *italic*.
+  function md(src) {
+    const inline = t => esc(t).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,;:!?]|$)/g, "$1<i>$2</i>");
+    const block = t => {
+      const out = []; let list = null;
+      const close = () => { if (list) { out.push(`</${list}>`); list = null; } };
+      for (const line of t.split("\n")) {
+        let m;
+        if ((m = line.match(/^\s*[-*•]\s+(.*)/))) { if (list !== "ul") { close(); out.push("<ul>"); list = "ul"; } out.push(`<li>${inline(m[1])}</li>`); continue; }
+        if ((m = line.match(/^\s*\d+[.)]\s+(.*)/))) { if (list !== "ol") { close(); out.push("<ol>"); list = "ol"; } out.push(`<li>${inline(m[1])}</li>`); continue; }
+        close();
+        if ((m = line.match(/^#{1,4}\s+(.*)/))) out.push(`<h4>${inline(m[1])}</h4>`);
+        else if (line.trim()) out.push(`<p>${inline(line)}</p>`);
+      }
+      close();
+      return out.join("");
+    };
+    const parts = String(src).split(/```[\w+-]*\n?([\s\S]*?)(?:```|$)/g);
+    return parts.map((p, i) => i % 2 ? `<pre>${esc(p.replace(/\n$/, ""))}</pre>` : block(p)).join("");
+  }
+
+  // The parts of a module's course notes that best match a query, within a character budget.
+  function notesFor(modId, query, budget) {
+    const text = notes[modId] || "";
+    if (text.length <= budget) return text;
+    const chunks = [];
+    for (let i = 0; i < text.length; i += 1500) chunks.push({ i, t: text.slice(i, i + 1500) });
+    const words = [...new Set(String(query).toLowerCase().match(/[a-z0-9äöüß]{3,}/g) || [])];
+    if (!words.length) return text.slice(0, budget);
+    for (const c of chunks) { const lt = c.t.toLowerCase(); c.score = words.reduce((n, w) => n + (lt.split(w).length - 1), 0); }
+    const keep = chunks.slice().sort((a, b) => b.score - a.score).slice(0, Math.floor(budget / 1500)).sort((a, b) => a.i - b.i);
+    return keep.map(c => c.t).join("\n…\n");
+  }
+  function weakSpots(modId, max = 8) {
+    const rows = [];
+    for (const d of decksIn(modId)) for (const c of d.cards) {
+      const p = cardProg(d.id, c.id);
+      if (p.wrong > 0) rows.push({ c, p });
+    }
+    return rows.sort((a, b) => (b.p.wrong - b.p.right) - (a.p.wrong - a.p.right)).slice(0, max)
+      .map(({ c, p }) => `- ${c.front.slice(0, 160)} (correct: ${answerText(c).slice(0, 120).replace(/\n/g, " ")}${p.lastWrong ? `; they answered: ${p.lastWrong.slice(0, 120).replace(/\n/g, " ")}` : ""})`).join("\n");
+  }
+  function contextFor(m, query, budget = 16000) {
+    const n = notesFor(m.id, query, budget), weak = weakSpots(m.id);
+    return `Module: ${m.code}${m.name ? ` (${m.name})` : ""}, IU International University, B.Sc. Business IT.
+${n ? `Course material, from the student's own notes (treat it as the syllabus and prefer its terms and examples):\n<<<\n${n}\n>>>` : "No course notes were added, so use standard university material for this module."}
+${weak ? `\nCards the student keeps getting wrong:\n${weak}` : ""}`;
+  }
+
+  const DECK_SPEC = `Deck format (JSON):
+{"id": "short-slug", "title": "…", "module": "MODULECODE", "description": "one sentence", "cards": [
+  {"id": "unique-slug", "unit": "Unit 4", "type": "mc", "front": "What does this print?", "code": "optional code, \\n for new lines", "choices": ["…", "…", "…", "…"], "answer": 0, "explain": "why, naming the trap"},
+  {"id": "…", "unit": "Unit 4", "type": "input", "front": "…", "answer": "one line", "accept": ["other correct spellings"], "caseSensitive": true, "explain": "…"},
+  {"id": "…", "unit": "Unit 2", "type": "write", "front": "…", "answer": "multi-line model answer", "explain": "…"}
+]}
+Rules: mix about 40% "mc", 30% "input", 30% "write" (the student must practise producing answers from a blank page, not just recognising them). "mc" answer is the index of the right choice (0 = first); wrong choices are realistic exam traps. "input" is for short answers checked automatically: set caseSensitive true for code and list alternatives in accept. Code goes in "code", never in "front". "explain" is 1-2 sentences on why. "unit" is always "Unit N". Card ids are unique slugs. Valid JSON only: double quotes, no comments, no trailing commas.`;
+
+  function renderJob() {
+    const el = $("#job"); if (!el) return;
+    const id = activeId();
+    if (JOB && JOB.modId === id) {
+      el.className = "job";
+      el.innerHTML = `<span class="spin" aria-hidden="true"></span><span class="grow">Claude is writing cards on ${esc(JOB.label)}… ${JOB.n ? `<b>${JOB.n}</b> so far` : "thinking"}</span><button class="btn small" id="stopJob">Stop</button>`;
+    } else if (JOB_ERR && JOB_ERR.modId === id) {
+      el.className = "job err";
+      el.innerHTML = `<span class="grow">${esc(JOB_ERR.msg)}</span><button class="btn small" id="dismissJob">OK</button>`;
+    } else { el.className = ""; el.innerHTML = ""; }
+    const mk = $("#makeCards"); if (mk) mk.disabled = !!JOB;
+  }
+
+  async function makeCards(m, topic, extra = "", label = "") {
+    if (!AI || JOB || !m) return;
+    const existing = decksIn(m.id).flatMap(d => d.cards.map(c => "- " + c.front.slice(0, 90).replace(/\n/g, " "))).slice(0, 80).join("\n");
+    const prompt = `You write flashcards for a university student preparing a written exam: multiple-choice questions plus questions where they must write code or terms from a blank page.
+
+${contextFor(m, topic + " " + extra)}
+
+Write one deck of about 15 cards ${topic ? `on: ${topic}` : "on the most exam-relevant topics in the course material"}.
+${extra}
+${existing ? `The student already has these cards. Don't repeat them:\n${existing}\n` : ""}
+${DECK_SPEC}
+Use "module": "${m.code}". Reply with only the JSON deck.`;
+    JOB = { ctl: new AbortController(), modId: m.id, label: label || (topic ? `“${topic}”` : "this module"), n: 0 };
+    JOB_ERR = null;
+    renderJob();
+    try {
+      const raw = await AI.json(prompt, {
+        signal: JOB.ctl.signal, cache: false,
+        onText: ({ text }) => { const n = (text.match(/"front"\s*:/g) || []).length; if (JOB && n !== JOB.n) { JOB.n = n; renderJob(); } },
+      });
+      if (!raw || typeof raw !== "object" || Array.isArray(raw) && !raw.length) throw { code: "invalid_json" };
+      const deckIn = Array.isArray(raw) ? { title: topic || "New cards", cards: raw } : raw;
+      deckIn.module = m.code;
+      const base = modKey(m.code).toLowerCase() + "-" + slug(deckIn.title || topic || "cards");
+      let id = base, i = 2;
+      while (decks()[id]) id = `${base}-${i++}`;
+      deckIn.id = id;
+      const deck = normaliseDeck(deckIn);
+      JOB = null;
+      importDeck(deck);
+    } catch (e) {
+      JOB = null;
+      const msg = e instanceof Error ? "Claude's deck had a problem (" + e.message.split("\n")[0] + "). Press Make cards again." : aiError(e);
+      JOB_ERR = msg ? { modId: m.id, msg } : null;
+      renderJob();
+    }
+  }
+
+  function chatDeck(content) {
+    if (!/"cards"\s*:/.test(content)) return null;
+    try { return parseDeckText(content); } catch { return null; }
+  }
+  function renderThread() {
+    const el = $("#thread"), m = activeMod(); if (!el) return;
+    const turns = (m && chats[m.id]) || [];
+    if (!AI || !turns.length) { el.hidden = true; el.innerHTML = ""; return; }
+    el.hidden = false;
+    el.innerHTML = `<div class="th"><h2 class="sect" style="margin:0">Chat with Claude</h2>${CHAT ? `<button id="stopChat">Stop</button>` : `<button id="clearChat">Clear</button>`}</div>` +
+      turns.map((t, i) => {
+        if (t.role === "user") return `<div class="msg me"><div class="bubble">${esc(t.content)}</div></div>`;
+        const deck = !t.pending && chatDeck(t.content);
+        const body = deck ? t.content.replace(/```[\w]*\s*[\s\S]*?(```|$)/, "") : t.content;
+        return `<div class="msg aiout">${t.pending && !t.content ? `<p class="thinking">Thinking…</p>` : md(body)}
+          ${deck ? `<div class="deckchip"><span class="grow"><b>${esc(deck.title)}</b><br><small>${deck.cards.length} cards</small></span>${t.added ? `<span class="claude-ok">Added ✓</span>` : `<button class="btn small primary" data-add="${i}">Add to ${esc(m.code)}</button>`}</div>` : ""}
+          ${t.error ? `<p class="err">${esc(t.error)}</p>` : ""}</div>`;
+      }).join("");
+  }
+  async function sendChat(m, text) {
+    if (!AI || CHAT) return;
+    const turns = (chats[m.id] ||= []);
+    turns.push({ role: "user", content: text });
+    const reply = { role: "assistant", content: "", pending: true };
+    turns.push(reply);
+    CHAT = { ctl: new AbortController(), modId: m.id };
+    renderThread();
+    $("#sendChat") && ($("#sendChat").disabled = true);
+    const history = []; let size = 0;
+    for (let i = turns.length - 2; i >= 0; i--) {
+      const t = turns[i]; if (!t.content) continue;
+      size += t.content.length;
+      if (size > 30000 && history.length) break;
+      history.unshift({ role: t.role, content: t.content });
+    }
+    const rules = `You are a study tutor built into a university student's flashcard app. Be concise and concrete. Teach puzzle-first: show a short example, let the key point land, then explain. Use Java for code examples when the module is about programming. Use Markdown.
+
+${contextFor(m, text)}
+
+If the student asks for flashcards, a quiz, a deck or cards, reply with one short sentence and then one \`\`\`json block holding a deck. ${DECK_SPEC}
+Use "module": "${m.code}".`;
+    try {
+      const { text: out } = await AI([{ role: "user", content: rules }, ...history], {
+        cache: false, signal: CHAT.ctl.signal,
+        onText: ({ text: t }) => { reply.content = t; if (activeId() === m.id && !S) renderThread(); },
+      });
+      reply.content = out;
+    } catch (e) {
+      reply.content = e.text || "";
+      const msg = aiError(e);
+      if (msg) reply.error = msg;
+      if (!reply.content && !msg) turns.splice(turns.indexOf(reply), 1);   // stopped before any text
+    }
+    delete reply.pending;
+    CHAT = null;
+    if (turns.length > 40) turns.splice(0, turns.length - 40);
+    save(KEY_CHAT, chats);
+    if (!S && activeId() === m.id) { renderThread(); const b = $("#sendChat"); if (b) b.disabled = false; }
+  }
+
+  /* ---------- in-page dialogs (claude.ai pages can't use confirm/prompt) ---------- */
+  function ask(title, msg, ok = "Delete") {
+    const d = $("#askDlg");
+    $("#askTitle").textContent = title; $("#askMsg").textContent = msg; $("#askOk").textContent = ok;
+    d.returnValue = "";
+    d.showModal();
+    return new Promise(res => d.addEventListener("close", () => res(d.returnValue === "yes"), { once: true }));
+  }
+  function showCopy(text) {
+    $("#copyText").value = text;
+    $("#copyDlg").showModal();
+    $("#copyText").select();
+  }
+
   /* ---------- misc ---------- */
   function show(id) { ["home", "session", "summary"].forEach(s => $("#" + s).hidden = s !== id); window.scrollTo({ top: 0 }); }
   function home() { S = null; renderHome(); show("home"); }
@@ -964,7 +1497,9 @@ ${rows.map((r, i) => cardLine(r.c, r.p.lastWrong, i).replace(/^(\d+\. )/, `$1(${
     catch {
       const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
       document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); toast(msg); } catch { prompt("Copy this:", text); }
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch { ok = false; }
+      ok ? toast(msg) : showCopy(text);
       ta.remove();
     }
   }
@@ -990,6 +1525,8 @@ ${rows.map((r, i) => cardLine(r.c, r.p.lastWrong, i).replace(/^(\d+\. )/, `$1(${
 
   renderHome();
   loadBuiltIn();
+  startAI();
+  Sync.start();
 })();
 </script>
 </body>
