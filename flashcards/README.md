@@ -4,12 +4,19 @@ A flashcard quiz that takes its decks from my Claude university project. Single 
 
 Live: https://victorqfr18.github.io/iU-business-it-degree/flashcards/
 
+## Module tabs
+
+Each module I'm studying gets a tab (the **+** tab adds one, **Edit** renames it, changes its code or deletes it). A tab shows the decks whose `module` matches its code, and a red badge counts the cards due. The tabs are saved in the browser.
+
 ## How it links to Claude
 
+A website can't read claude.ai chats, so the link is one tap each way:
+
 1. Paste [`CLAUDE_PROJECT.md`](CLAUDE_PROJECT.md) (the part below the line) into the Claude project's instructions.
-2. Ask Claude in the project for flashcards on whatever I'm studying. It answers with a JSON deck.
-3. **Import deck** → paste. Re-importing a deck with the same `id` updates its cards and keeps progress.
-4. After a session, **Copy report for Claude** puts the missed cards (with my wrong answers) on the clipboard. Paste it into the project and Claude re-teaches them and sends a follow-up deck.
+2. In the module tab, press **Edit** and paste the project's address (`https://claude.ai/project/…`).
+3. Type what I'm studying now and press **Get cards from Claude**. It copies a prompt (module, topic, deck id, the decks I already have) and opens the project. Paste it into a new chat and send.
+4. Copy Claude's reply, come back and press **Paste deck from Claude**. The deck lands in the tab for its `module` (a new tab is made if none exists). Re-importing a deck with the same `id` updates its cards and keeps progress.
+5. After a session, **Send report to Claude** copies the missed cards (with my wrong answers) and opens the project again, so Claude re-teaches them and sends a follow-up deck.
 
 ## Card types
 

@@ -88,6 +88,22 @@
   .howto li{margin:4px 0}
   .empty{text-align:center; color:var(--text2); padding:36px 18px}
 
+  /* module tabs */
+  .tabs{display:flex; gap:6px; overflow-x:auto; margin:0 -16px 14px; padding:2px 16px 4px; scrollbar-width:none; -webkit-overflow-scrolling:touch}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:none; display:flex; align-items:center; gap:6px; min-height:36px; padding:0 14px; border-radius:18px; background:var(--field); font-size:15px; font-weight:600; white-space:nowrap}
+  .tab[aria-selected="true"]{background:var(--accent); color:var(--accent-fg)}
+  .tab .n{font-size:12px; font-weight:700; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--bad); color:#fff; display:grid; place-items:center; font-variant-numeric:tabular-nums}
+  .tab.add{padding:0 12px; color:var(--accent); font-size:20px; font-weight:500}
+  .modhead{display:flex; align-items:flex-start; gap:10px}
+  .modhead .grow{min-width:0}
+  .modhead h2{font-size:22px; line-height:1.25; margin:2px 0 0; letter-spacing:-.01em}
+  .field{display:block; margin-top:14px}
+  .field span{display:block; font-size:13px; color:var(--text2); margin-bottom:6px}
+  .note{font-size:13px; color:var(--text3); margin-top:10px}
+  .note button{color:var(--accent); font-size:13px}
+  .claude-ok{color:var(--good); font-weight:600}
+
   /* session */
   .shead{display:flex; align-items:center; gap:10px; margin:4px 0 14px}
   .shead .bar{flex:1}
@@ -157,16 +173,17 @@
         <h1>Flashcards</h1>
         <p class="sub">Recognise it, then write it from a blank page.</p>
       </div>
-      <button class="btn primary small" id="importBtn">Import deck</button>
     </header>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Modules"></nav>
+    <div id="modpanel"></div>
     <div id="decks"></div>
     <div class="card howto">
-      <b style="color:var(--text)">Link it to your Claude project</b>
+      <b style="color:var(--text)">Set up the link to Claude (once per project)</b>
       <ol>
         <li><button class="btn ghost small" id="copyInstr" style="padding:0;min-height:0;display:inline">Copy the Claude instructions</button> and paste them into your Claude project's custom instructions (<a href="https://github.com/victorqfr18/iU-business-it-degree/blob/main/flashcards/CLAUDE_PROJECT.md">read them</a>).</li>
-        <li>In the project, ask Claude: <i>"Make flashcards for Unit 4."</i> It replies with a JSON deck.</li>
-        <li>Copy it, press <b>Import deck</b> here and paste. Same deck id = cards are updated, progress is kept.</li>
-        <li>After a session, press <b>Copy report for Claude</b> and paste it into the project chat so Claude re-teaches what you missed.</li>
+        <li>Open the project on claude.ai, copy the address from the address bar (it looks like <code>claude.ai/project/…</code>), then press <b>Edit</b> on the module here and paste it in.</li>
+        <li>Now <b>Get cards from Claude</b> copies a prompt and opens the project: paste, send, copy Claude's reply, come back and press <b>Paste deck from Claude</b>.</li>
+        <li>After a session, <b>Send report to Claude</b> does the same with the cards you missed.</li>
       </ol>
     </div>
   </section>
@@ -203,6 +220,22 @@
   </form>
 </dialog>
 
+<dialog id="modDlg">
+  <form method="dialog" class="in" id="modForm">
+    <h3 id="modTitle">Module</h3>
+    <label class="field"><span>Module code</span><input type="text" id="modCode" required autocapitalize="characters" autocomplete="off" placeholder="DLBCSDSJCL01"></label>
+    <label class="field"><span>Module name</span><input type="text" id="modName" autocomplete="off" placeholder="Data Structures and Java Class Library"></label>
+    <label class="field"><span>Claude project link</span><input type="text" id="modClaude" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://claude.ai/project/…"></label>
+    <div class="err" id="modErr"></div>
+    <div class="row">
+      <button class="btn small bad" type="button" id="modDelete">Delete module</button>
+      <span class="grow"></span>
+      <button class="btn small" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary small" value="save">Save</button>
+    </div>
+  </form>
+</dialog>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -210,7 +243,7 @@
   "use strict";
 
   /* ---------- storage ---------- */
-  const KEY_DECKS = "fq.importedDecks.v1", KEY_PROG = "fq.progress.v1", KEY_PREF = "fq.prefs.v1";
+  const KEY_DECKS = "fq.importedDecks.v1", KEY_PROG = "fq.progress.v1", KEY_PREF = "fq.prefs.v1", KEY_MODS = "fq.modules.v1";
   const load = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
   const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { toast("Could not save — browser storage is off or full"); } };
 
@@ -218,6 +251,9 @@
   let imported = load(KEY_DECKS, {});        // id -> deck, pasted by the user
   let progress = load(KEY_PROG, {});         // deckId -> cardId -> {box, due, right, wrong, last}
   let prefs = load(KEY_PREF, { size: 20, unit: {} });
+  // Module tabs: {id, code, name, claude (project URL), topic (what I'm studying now)}
+  let modules = load(KEY_MODS, null) || [{ id: "m" + Date.now().toString(36), code: "DLBCSDSJCL01", name: "Data Structures and Java Class Library", claude: "", topic: "" }];
+  const OTHER = "__other";
 
   const DAY = 864e5;
   const INTERVALS = [0, 0, 1, 3, 7, 16, 35];   // days until due, by box (1..6). Box 0 = new.
@@ -315,19 +351,77 @@
 
   const units = deck => [...new Set(deck.cards.map(c => c.unit).filter(Boolean))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
+  /* ---------- modules ---------- */
+  const modKey = code => String(code || "").trim().toUpperCase();
+  const saveMods = () => save(KEY_MODS, modules);
+  const moduleOf = deck => modules.find(m => modKey(m.code) === modKey(deck.module));
+  const orphans = () => Object.values(decks()).filter(d => !moduleOf(d));
+  const decksIn = id => id === OTHER ? orphans() : Object.values(decks()).filter(d => moduleOf(d)?.id === id);
+  function activeId() {
+    if (prefs.active === OTHER && orphans().length) return OTHER;
+    return modules.some(m => m.id === prefs.active) ? prefs.active : (modules[0]?.id || (orphans().length ? OTHER : null));
+  }
+  const activeMod = () => modules.find(m => m.id === activeId());
+  const safeUrl = u => /^https:\/\/\S+$/i.test(String(u || "").trim()) ? String(u).trim() : "";
+
   /* ---------- home ---------- */
   function renderHome() {
-    const all = Object.values(decks());
-    const host = $("#decks");
+    renderTabs();
+    renderModPanel();
+    renderDecks();
+  }
+
+  function renderTabs() {
+    const act = activeId();
+    const dueIn = id => decksIn(id).reduce((n, d) => n + deckStats(d).due, 0);
+    const tab = (id, label, title) => {
+      const due = dueIn(id);
+      return `<button class="tab" role="tab" data-tab="${esc(id)}" aria-selected="${id === act}" title="${esc(title)}">${esc(label)}${due ? `<span class="n" aria-label="${due} due">${due}</span>` : ""}</button>`;
+    };
+    $("#tabs").innerHTML = modules.map(m => tab(m.id, m.code, m.name || m.code)).join("")
+      + (orphans().length ? tab(OTHER, "Other", "Decks whose module has no tab") : "")
+      + `<button class="tab add" id="addMod" aria-label="Add module" title="Add module">+</button>`;
+    $(`.tab[aria-selected="true"]`)?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+
+  function renderModPanel() {
+    const m = activeMod(), host = $("#modpanel");
+    if (!m) {
+      host.innerHTML = activeId() === OTHER
+        ? `<div class="card"><h2 style="margin:0;font-size:20px">Other decks</h2><p class="sub">These decks belong to a module with no tab. Add a tab with the same module code to move them there.</p></div>`
+        : `<div class="card empty">No modules yet.<br><br><button class="btn primary" id="addMod2">Add the module you're studying</button></div>`;
+      return;
+    }
+    const link = safeUrl(m.claude);
+    host.innerHTML = `<div class="card">
+      <div class="modhead">
+        <div class="grow"><div class="deck"><div class="mod">${esc(m.code)}</div></div><h2>${esc(m.name || m.code)}</h2></div>
+        <button class="btn small" id="editMod">Edit</button>
+      </div>
+      <label class="field"><span>What are you studying right now?</span>
+        <input type="text" id="topic" value="${esc(m.topic || "")}" placeholder="e.g. Unit 4 — Iterators and Maps" autocomplete="off"></label>
+      <div class="row">
+        <button class="btn primary" id="askClaude">Get cards from Claude ↗</button>
+        <button class="btn" id="pasteDeck">Paste deck from Claude</button>
+        <button class="btn ghost small" id="importBtn">Import file…</button>
+      </div>
+      <p class="note">${link
+        ? `<span class="claude-ok">✓ Linked to your Claude project.</span> The buttons copy a prompt and open it.`
+        : `Not linked yet. <button id="linkMod">Add your Claude project link</button> so the buttons open the project directly.`}</p>
+    </div>`;
+  }
+
+  function renderDecks() {
+    const id = activeId(), all = id ? decksIn(id) : [], host = $("#decks");
+    if (!id) { host.innerHTML = ""; return; }
     if (!all.length) {
-      host.innerHTML = `<div class="card empty">No decks yet.<br>Ask your Claude project for flashcards, then press <b>Import deck</b>.</div>`;
+      host.innerHTML = `<div class="card empty">No decks for this module yet.<br>Type what you're studying above and press <b>Get cards from Claude</b>.</div>`;
       return;
     }
     host.innerHTML = all.map(d => {
       const s = deckStats(d), us = units(d), pct = n => (n / s.total * 100).toFixed(2) + "%";
       const unitSel = prefs.unit[d.id] || "";
       return `<article class="card deck" data-id="${esc(d.id)}">
-        ${d.module ? `<div class="mod">${esc(d.module)}</div>` : ""}
         <h2>${esc(d.title)}</h2>
         ${d.description ? `<p>${fmt(d.description)}</p>` : ""}
         <div class="stats">
@@ -349,7 +443,7 @@
           ${us.length > 1 ? `<select data-act="unit" aria-label="Filter by unit"><option value="">All units</option>${us.map(u => `<option ${u === unitSel ? "selected" : ""}>${esc(u)}</option>`).join("")}</select>` : ""}
         </div>
         <div class="deckfoot">
-          <button data-act="report">Copy weak-spot report for Claude</button>
+          <button data-act="report">Send weak-spot report to Claude</button>
           <button data-act="reset">Reset progress</button>
           ${imported[d.id] ? `<button data-act="delete" class="danger">Delete deck</button>` : ""}
           <span class="grow"></span>
@@ -359,12 +453,102 @@
     }).join("");
   }
 
+  $("#tabs").addEventListener("click", e => {
+    const t = e.target.closest(".tab"); if (!t) return;
+    if (t.id === "addMod") return editModule(null);
+    prefs.active = t.dataset.tab; save(KEY_PREF, prefs);
+    renderHome();
+  });
+
+  $("#modpanel").addEventListener("click", e => {
+    const id = e.target.closest("button")?.id, m = activeMod();
+    if (id === "addMod2") editModule(null);
+    else if (id === "editMod" || id === "linkMod") editModule(m, id === "linkMod");
+    else if (id === "importBtn") openImport("");
+    else if (id === "pasteDeck") pasteDeck();
+    else if (id === "askClaude") {
+      const topic = (m.topic || "").trim(), deckId = modKey(m.code).toLowerCase() + "-" + (topic ? slug(topic) : "current");
+      const existing = decksIn(m.id).map(d => `"${d.id}" (${d.title})`);
+      sendToClaude(`Make a flashcard deck for ${m.code}${m.name ? ` (${m.name})` : ""}${topic ? ` on: ${topic}` : " on what I'm studying right now"}.
+Base it on the course material in this project. Use the flashcard JSON format from the project instructions, with "module": "${m.code}" and deck id "${deckId}".${existing.length ? `\nDecks I already have for this module: ${existing.join(", ")}. Don't repeat their cards.` : ""}`, m, "Prompt copied");
+    }
+  });
+  $("#modpanel").addEventListener("input", e => {
+    if (e.target.id !== "topic") return;
+    activeMod().topic = e.target.value; saveMods();
+  });
+
+  /* Copy text, then open the module's Claude project (if linked) so it can be pasted straight into a chat. */
+  function sendToClaude(text, m, what) {
+    const link = safeUrl(m?.claude);
+    const copied = copySync(text);
+    if (link) {
+      window.open(link, "_blank", "noopener");
+      toast(copied ? `${what} — paste it into a new chat in the project` : "Couldn't copy automatically");
+    } else {
+      toast(copied ? `${what}. Add the Claude project link (Edit) to open it directly next time.` : "Couldn't copy automatically");
+    }
+    if (!copied) prompt("Copy this and paste it into Claude:", text);
+  }
+
+  async function pasteDeck() {
+    let text = "";
+    try { text = await navigator.clipboard.readText(); } catch { /* not allowed: fall back to the dialog */ }
+    if (!text.trim()) return openImport("", "Paste Claude's reply below (long-press → Paste on a phone).");
+    try { importDeck(parseDeckText(text)); }
+    catch (err) { openImport(text, "The clipboard didn't hold a valid deck: " + err.message + "\nCopy Claude's whole reply (or just the JSON block) and try again."); }
+  }
+
+  /* ---------- module dialog ---------- */
+  const mdlg = $("#modDlg");
+  let editing = null;
+  function editModule(m, focusLink) {
+    editing = m;
+    $("#modTitle").textContent = m ? "Edit module" : "Add a module";
+    $("#modCode").value = m?.code || "";
+    $("#modName").value = m?.name || "";
+    $("#modClaude").value = m?.claude || "";
+    $("#modErr").textContent = "";
+    $("#modDelete").hidden = !m;
+    mdlg.showModal();
+    (focusLink ? $("#modClaude") : $("#modCode")).focus();
+  }
+  $("#modForm").addEventListener("submit", e => {
+    if (e.submitter && e.submitter.value === "cancel") return;
+    e.preventDefault();
+    const code = $("#modCode").value.trim(), name = $("#modName").value.trim(), claude = $("#modClaude").value.trim();
+    if (!code) return $("#modErr").textContent = "Give the module a code, e.g. DLBCSDSJCL01.";
+    if (modules.some(m => m !== editing && modKey(m.code) === modKey(code))) return $("#modErr").textContent = "There is already a tab for " + code + ".";
+    const link = claude && !/^https?:\/\//i.test(claude) ? "https://" + claude : claude;
+    if (link && !safeUrl(link)) return $("#modErr").textContent = "The Claude link should look like https://claude.ai/project/…";
+    if (editing) {
+      if (modKey(editing.code) !== modKey(code)) {   // keep imported decks in this tab when the code changes
+        Object.values(imported).forEach(d => { if (modKey(d.module) === modKey(editing.code)) d.module = code; });
+        save(KEY_DECKS, imported);
+      }
+      Object.assign(editing, { code, name, claude: link });
+    } else {
+      const m = { id: "m" + Date.now().toString(36), code, name, claude: link, topic: "" };
+      modules.push(m);
+      prefs.active = m.id; save(KEY_PREF, prefs);
+    }
+    saveMods(); mdlg.close(); renderHome();
+  });
+  $("#modDelete").addEventListener("click", () => {
+    const m = editing, mine = Object.values(imported).filter(d => modKey(d.module) === modKey(m.code));
+    if (!confirm(`Delete the ${m.code} tab${mine.length ? ` and its ${mine.length} imported deck${mine.length > 1 ? "s" : ""} (with progress)` : ""}?`)) return;
+    mine.forEach(d => { delete imported[d.id]; delete progress[d.id]; });
+    modules = modules.filter(x => x !== m);
+    save(KEY_DECKS, imported); save(KEY_PROG, progress); saveMods();
+    mdlg.close(); renderHome();
+  });
+
   $("#decks").addEventListener("click", e => {
     const b = e.target.closest("button[data-act]"); if (!b) return;
     const deck = decks()[b.closest("[data-id]").dataset.id];
     const act = b.dataset.act;
     if (act === "study" || act === "weak" || act === "all") startSession(deck, act);
-    else if (act === "report") copy(weakReport(deck), "Report copied — paste it into your Claude project");
+    else if (act === "report") sendToClaude(weakReport(deck), moduleOf(deck), "Report copied");
     else if (act === "reset") {
       if (confirm(`Reset all progress for "${deck.title}"?`)) { delete progress[deck.id]; save(KEY_PROG, progress); renderHome(); }
     } else if (act === "delete") {
@@ -574,7 +758,7 @@
       ${S.log.length ? `<h3 style="margin:18px 0 0;font-size:17px">Missed first time</h3>
         <ul class="missed">${S.log.map(({ card: c, given }) => `<li><div>${fmt(c.front)}</div><div class="a">${looksLikeCode(answerText(c)) ? `<pre>${esc(answerText(c))}</pre>` : "Answer: " + fmt(answerText(c))}</div></li>`).join("")}</ul>` : `<p>Clean run. Nothing to send back.</p>`}
       <div class="row">
-        ${S.log.length ? `<button class="btn primary" id="copyReport">Copy report for Claude</button>` : ""}
+        ${S.log.length ? `<button class="btn primary" id="copyReport">Send report to Claude ↗</button>` : ""}
         <span class="grow"></span>
         <button class="btn" id="again">Back to decks</button>
       </div>`;
@@ -582,7 +766,7 @@
   }
 
   $("#sumcard").addEventListener("click", e => {
-    if (e.target.id === "copyReport") copy(sessionReport(), "Report copied — paste it into your Claude project");
+    if (e.target.id === "copyReport") sendToClaude(sessionReport(), moduleOf(S.deck), "Report copied");
     if (e.target.id === "again") home();
   });
 
@@ -621,7 +805,20 @@ ${rows.map((r, i) => cardLine(r.c, r.p.lastWrong, i).replace(/^(\d+\. )/, `$1(${
 
   /* ---------- import ---------- */
   const dlg = $("#importDlg");
-  $("#importBtn").addEventListener("click", () => { $("#importErr").textContent = ""; $("#importText").value = ""; dlg.showModal(); $("#importText").focus(); });
+  function openImport(text, msg = "") { $("#importErr").textContent = msg; $("#importText").value = text; dlg.showModal(); $("#importText").focus(); }
+  function importDeck(deck) {
+    const m = activeMod();
+    if (!deck.module && m) deck.module = m.code;               // no module in the JSON: it belongs to the open tab
+    if (deck.module && !moduleOf(deck)) modules.push({ id: "m" + Date.now().toString(36), code: deck.module, name: "", claude: "", topic: "" });
+    const existed = !!decks()[deck.id];
+    imported[deck.id] = deck;
+    save(KEY_DECKS, imported); saveMods();
+    const home = moduleOf(deck);
+    prefs.active = home ? home.id : OTHER; save(KEY_PREF, prefs);
+    if (dlg.open) dlg.close();
+    renderHome();
+    toast(`${existed ? "Updated" : "Imported"} “${deck.title}” — ${deck.cards.length} cards`);
+  }
   $("#importFile").addEventListener("change", async e => {
     const f = e.target.files[0]; if (!f) return;
     $("#importText").value = await f.text();
@@ -631,13 +828,7 @@ ${rows.map((r, i) => cardLine(r.c, r.p.lastWrong, i).replace(/^(\d+\. )/, `$1(${
     if (e.submitter && e.submitter.value === "cancel") return;
     e.preventDefault();
     try {
-      const deck = parseDeckText($("#importText").value);
-      const existed = !!decks()[deck.id];
-      imported[deck.id] = deck;
-      save(KEY_DECKS, imported);
-      dlg.close();
-      renderHome();
-      toast(`${existed ? "Updated" : "Imported"} “${deck.title}” — ${deck.cards.length} cards`);
+      importDeck(parseDeckText($("#importText").value));
     } catch (err) { $("#importErr").textContent = err.message; }
   });
 
@@ -647,6 +838,18 @@ ${rows.map((r, i) => cardLine(r.c, r.p.lastWrong, i).replace(/^(\d+\. )/, `$1(${
 
   let tt;
   function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 2600); }
+
+  // Synchronous copy, so it still counts as part of the tap when a new tab opens right after.
+  function copySync(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.readOnly = true; ta.style.position = "fixed"; ta.style.top = "0"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0, text.length);
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch { ok = false; }
+    ta.remove();
+    if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(text).catch(() => {}); ok = true; }
+    return ok;
+  }
 
   async function copy(text, msg) {
     try { await navigator.clipboard.writeText(text); toast(msg); }
