@@ -1,8 +1,21 @@
 # Flashcards
 
-A flashcard quiz that takes its decks from my Claude university project. Single HTML file, no build step, progress saved in the browser.
+A flashcard quiz for my IU modules. One HTML file, no build step, two ways to run it:
 
-Live: https://victorqfr18.github.io/iU-business-it-degree/flashcards/
+- **On claude.ai, with Claude built in:** https://claude.ai/artifact/7oydLcwvP2euRu1nZPCTLU (private to my account). The page asks Claude directly on my Claude plan, and decks, progress, chats and course notes are saved to my claude.ai account, so they follow me between devices.
+- **On GitHub Pages:** https://victorqfr18.github.io/iU-business-it-degree/flashcards/. Same app, but Claude is reached by copy and paste through my Claude project, and everything is saved in the browser.
+
+The page switches automatically: when it can reach Claude (`window.claude.use("sample")`) the Claude features appear and the copy/paste buttons hide.
+
+## Claude built in (claude.ai version)
+
+- **Course notes** per module (Edit → paste text, or add .pdf/.txt/.md files). Claude bases every card and answer on them; long notes are searched for the parts that match the question.
+- **Make cards**: type a topic, press Make cards, and a new deck of about 15 cards lands in the module.
+- **Chat**: the text box talks to Claude about the module. It knows my weak spots. Asking for a quiz returns a deck with an "Add" button.
+- **In a quiz**: *Ask Claude why* after a miss explains the misunderstanding behind my answer. *Grade with Claude* marks a written answer like an exam marker before I confirm.
+- **After a session**: *Explain my mistakes* and *Make a follow-up deck*. On a deck: *New cards for my weak spots*.
+
+To update the claude.ai page after changing `index.html`, Claude republishes it (the published copy is `index.html` without the `<html>/<head>/<body>` wrapper, plus `decks/` and `CLAUDE_PROJECT.md`).
 
 ## Modules
 
