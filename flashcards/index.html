@@ -13,30 +13,31 @@
 <style>
   :root{
     color-scheme: light dark;
-    --bg:#ffffff; --bg2:#f2f2f7; --text:#1c1c1e; --text2:#6e6e73; --text3:#8e8e93;
-    --line:rgba(60,60,67,.22); --accent:#4b4fd6; --accent-fg:#ffffff; --accent-soft:rgba(75,79,214,.12);
-    --hover:rgba(60,60,67,.06); --field:rgba(118,118,128,.12); --code:#f4f4f8;
-    --good:#1f8a4c; --good-soft:rgba(31,138,76,.13); --bad:#d93a2f; --bad-soft:rgba(217,58,47,.12);
+    --bg:#ffffff; --bg2:#faf9f5; --side:#f3f1ea; --text:#1f1e1d; --text2:#5e5d59; --text3:#87867f;
+    --line:rgba(31,30,29,.13); --accent:#c96442; --accent-fg:#ffffff; --accent-soft:rgba(201,100,66,.12);
+    --hover:rgba(31,30,29,.05); --field:rgba(31,30,29,.06); --code:#f5f4ef;
+    --good:#2f7d4f; --good-soft:rgba(47,125,79,.12); --bad:#c0392b; --bad-soft:rgba(192,57,43,.1);
     --shadow:0 10px 40px rgba(0,0,0,.16), 0 0 0 .5px rgba(0,0,0,.08);
     --toast:#1c1c1e; --toast-fg:#ffffff;
     --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
     --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#1c1c1e; --bg2:#000000; --text:#f2f2f7; --text2:#a1a1a6; --text3:#8d8d93;
-      --line:rgba(84,84,88,.55); --accent:#8e91ff; --accent-fg:#0b0b1f; --accent-soft:rgba(142,145,255,.18);
-      --hover:rgba(255,255,255,.06); --field:rgba(118,118,128,.24); --code:#111113;
-      --good:#4cd07d; --good-soft:rgba(76,208,125,.15); --bad:#ff6b61; --bad-soft:rgba(255,107,97,.15);
+      --bg:#30302e; --bg2:#262624; --side:#1f1e1d; --text:#faf9f5; --text2:#c2c0b6; --text3:#9c9a92;
+      --line:rgba(250,249,245,.12); --accent:#d97757; --accent-fg:#ffffff; --accent-soft:rgba(217,119,87,.18);
+      --hover:rgba(255,255,255,.05); --field:rgba(255,255,255,.07); --code:#1f1e1d;
+      --good:#6fc28e; --good-soft:rgba(111,194,142,.15); --bad:#ef7b6c; --bad-soft:rgba(239,123,108,.15);
       --shadow:0 10px 40px rgba(0,0,0,.6), 0 0 0 .5px rgba(255,255,255,.1);
       --toast:#f2f2f7; --toast-fg:#1c1c1e;
     }
   }
   :root[data-theme="dark"]{
-    --bg:#1c1c1e; --bg2:#000000; --text:#f2f2f7; --text2:#a1a1a6; --text3:#8d8d93;
-    --line:rgba(84,84,88,.55); --accent:#8e91ff; --accent-fg:#0b0b1f; --accent-soft:rgba(142,145,255,.18);
-    --hover:rgba(255,255,255,.06); --field:rgba(118,118,128,.24); --code:#111113;
-    --good:#4cd07d; --good-soft:rgba(76,208,125,.15); --bad:#ff6b61; --bad-soft:rgba(255,107,97,.15);
+    --bg:#30302e; --bg2:#262624; --side:#1f1e1d; --text:#faf9f5; --text2:#c2c0b6; --text3:#9c9a92;
+    --line:rgba(250,249,245,.12); --accent:#d97757; --accent-fg:#ffffff; --accent-soft:rgba(217,119,87,.18);
+    --hover:rgba(255,255,255,.05); --field:rgba(255,255,255,.07); --code:#1f1e1d;
+    --good:#6fc28e; --good-soft:rgba(111,194,142,.15); --bad:#ef7b6c; --bad-soft:rgba(239,123,108,.15);
     --shadow:0 10px 40px rgba(0,0,0,.6), 0 0 0 .5px rgba(255,255,255,.1);
     --toast:#f2f2f7; --toast-fg:#1c1c1e;
   }
@@ -52,7 +53,7 @@
   code{font-size:.9em; background:var(--field); padding:1px 5px; border-radius:5px; overflow-wrap:anywhere}
   pre{margin:12px 0 0; padding:12px 14px; background:var(--code); border:.5px solid var(--line); border-radius:10px; font-size:14px; line-height:1.5; overflow-x:auto; white-space:pre}
 
-  .wrap{max-width:720px; margin:0 auto; padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(48px + env(safe-area-inset-bottom,0px))}
+  .wrap{margin:0 auto; padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(48px + env(safe-area-inset-bottom,0px))}
   header.top{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin:8px 0 18px}
   header.top h1{font-size:34px; line-height:1.1; font-weight:700; letter-spacing:-.02em; margin:0}
   .sub{color:var(--text2); font-size:15px; margin:4px 0 0}
@@ -65,7 +66,7 @@
   .btn.bad{background:var(--bad-soft); color:var(--bad)}
   .btn kbd{font:600 11px var(--mono); opacity:.6; border:1px solid currentColor; border-radius:4px; padding:0 4px}
 
-  .card{background:var(--bg); border-radius:16px; padding:18px; margin-bottom:14px}
+  .card{background:var(--bg); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:14px}
   .deck h2{font-size:20px; line-height:1.25; margin:0; letter-spacing:-.01em}
   .deck .mod{font-size:13px; font-weight:600; color:var(--accent); letter-spacing:.02em; text-transform:uppercase}
   .deck p{margin:6px 0 0; color:var(--text2); font-size:15px}
@@ -87,6 +88,71 @@
   .howto ol{margin:8px 0 0; padding-left:20px}
   .howto li{margin:4px 0}
   .empty{text-align:center; color:var(--text2); padding:36px 18px}
+
+  /* ---------- app shell: sidebar + main (like claude.ai) ---------- */
+  .app{display:flex; min-height:100vh}
+  .side{position:sticky; top:0; height:100vh; width:272px; flex:none; display:flex; flex-direction:column; background:var(--side); border-right:1px solid var(--line); padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px))}
+  .app.collapsed .side{display:none}
+  .sbrand{display:flex; align-items:center; gap:8px; padding:4px 6px 12px}
+  .sbrand b{flex:1; font-family:var(--serif); font-size:21px; font-weight:600; letter-spacing:-.01em}
+  .iconbtn{width:34px; height:34px; display:grid; place-items:center; border-radius:9px; color:var(--text2)}
+  .iconbtn:hover{background:var(--hover); color:var(--text)}
+  .newbtn{display:flex; align-items:center; gap:10px; width:100%; padding:8px 10px; border-radius:10px; font-size:15px; font-weight:600; color:var(--accent)}
+  .newbtn .plus{width:24px; height:24px; border-radius:50%; background:var(--accent); color:var(--accent-fg); display:grid; place-items:center}
+  .newbtn:hover{background:var(--hover)}
+  .slabel{font-size:12px; font-weight:600; color:var(--text3); padding:16px 10px 6px}
+  .slist{flex:1; overflow-y:auto; margin:0 -4px; padding:0 4px}
+  .sitem{display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:7px 10px; border-radius:10px; color:var(--text)}
+  .sitem:hover{background:var(--hover)}
+  .sitem[aria-current="true"]{background:var(--field)}
+  .sitem svg{flex:none; color:var(--text2)}
+  .sitem[aria-current="true"] svg{color:var(--accent)}
+  .sitem .st{flex:1; min-width:0; display:flex; flex-direction:column}
+  .sitem .nm{font-size:14.5px; font-weight:500; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .sitem .cd{font-size:12px; color:var(--text3); line-height:1.3}
+  .sitem .n{flex:none; font-size:11.5px; font-weight:700; min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:var(--accent); color:var(--accent-fg); display:grid; place-items:center; font-variant-numeric:tabular-nums}
+  .sfoot{font-size:12px; color:var(--text3); padding:10px 10px 2px; border-top:1px solid var(--line); margin-top:8px}
+  .main{flex:1; min-width:0}
+  .topbar{position:sticky; top:0; z-index:5; display:none; align-items:center; gap:8px; padding:calc(8px + env(safe-area-inset-top,0px)) 12px 8px; background:var(--bg2); border-bottom:1px solid var(--line)}
+  .topbar .t{flex:1; min-width:0; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .app.collapsed .topbar{display:flex}
+  .scrim{display:none; position:fixed; inset:0; z-index:25; background:rgba(0,0,0,.35)}
+  @media (max-width:860px){
+    .side{position:fixed; left:0; top:0; bottom:0; z-index:30; width:min(300px, 86vw); transform:translateX(-102%); transition:transform .22s ease; box-shadow:var(--shadow)}
+    .app.collapsed .side{display:flex}
+    .app.open .side{transform:none}
+    .app.open .scrim{display:block}
+    .topbar{display:flex}
+    #collapseBtn{display:none}
+  }
+  @media (min-width:861px){ #closeSide{display:none} }
+
+  /* ---------- module page ---------- */
+  #home{max-width:1060px}
+  .crumb{font-size:13px; color:var(--text3); margin:6px 0 2px}
+  .phead{display:flex; align-items:flex-start; gap:10px; margin-bottom:16px}
+  .phead h1{flex:1; min-width:0; font-family:var(--serif); font-weight:500; font-size:32px; line-height:1.2; letter-spacing:-.01em; margin:0}
+  .composer{background:var(--bg); border:1px solid var(--line); border-radius:18px; padding:12px 12px 10px 16px; box-shadow:0 1px 8px rgba(0,0,0,.04); margin-bottom:22px}
+  .composer:focus-within{border-color:color-mix(in srgb, var(--accent) 45%, var(--line))}
+  .composer textarea{border:0; background:none; padding:4px 0; border-radius:0; resize:none; font-size:17px; min-height:56px}
+  .composer textarea:focus{border:0}
+  .crow{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:6px}
+  .chip{display:inline-flex; align-items:center; gap:6px; min-height:34px; padding:0 12px; border-radius:10px; border:1px solid var(--line); font-size:14px; font-weight:500; color:var(--text2)}
+  .chip:hover{background:var(--hover); color:var(--text)}
+  .send{margin-left:auto; display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 14px; border-radius:10px; background:var(--accent); color:var(--accent-fg); font-weight:600; font-size:15px}
+  .send:hover{filter:brightness(1.05)}
+  .cols{display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:22px; align-items:start}
+  .sect{font-size:14px; font-weight:600; color:var(--text2); margin:0 0 10px}
+  .field{display:block; margin-top:14px}
+  .field span{display:block; font-size:13px; color:var(--text2); margin-bottom:6px}
+  .panel h3{font-size:15px; margin:0 0 6px}
+  .panel p{font-size:14px; color:var(--text2); margin:0 0 10px; overflow-wrap:anywhere}
+  .panel a{color:var(--accent)}
+  .howto a{color:var(--accent)}
+  @media (max-width:420px){ .composer{padding-left:12px} .chip{padding:0 10px} .send{padding:0 12px} }
+  .claude-ok{color:var(--good); font-weight:600}
+  #session,#summary{max-width:720px}
+  @media (max-width:1100px){ .cols{grid-template-columns:minmax(0,1fr)} }
 
   /* session */
   .shead{display:flex; align-items:center; gap:10px; margin:4px 0 14px}
@@ -139,8 +205,9 @@
   .toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom,0px)); transform:translate(-50%, 20px); opacity:0; pointer-events:none; background:var(--toast); color:var(--toast-fg); padding:10px 16px; border-radius:12px; font-size:15px; transition:opacity .2s, transform .2s; max-width:calc(100vw - 32px)}
   .toast.show{opacity:1; transform:translate(-50%,0)}
 
+  #home,#session,#summary{margin:0 auto}
   @media (max-width:520px){
-    header.top h1{font-size:30px}
+    .phead h1{font-size:26px}
     .stats{grid-template-columns:repeat(2,1fr)}
     .q .front{font-size:18px}
     .actions .btn{flex:1}
@@ -148,26 +215,46 @@
 </style>
 </head>
 <body>
+<div class="app" id="app">
+<aside class="side" id="side" aria-label="Modules">
+  <div class="sbrand">
+    <b>Flashcards</b>
+    <button class="iconbtn" id="collapseBtn" title="Close sidebar" aria-label="Close sidebar"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="3.5" width="15" height="13" rx="2.5"/><path d="M7.5 3.5v13"/></svg></button>
+    <button class="iconbtn" id="closeSide" aria-label="Close menu"><svg width="18" height="18" viewBox="0 0 18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 4l10 10M14 4L4 14"/></svg></button>
+  </div>
+  <button class="newbtn" id="addMod"><span class="plus"><svg width="12" height="12" viewBox="0 0 12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 1.5v9M1.5 6h9"/></svg></span>New module</button>
+  <div class="slabel">Modules</div>
+  <nav class="slist" id="modlist"></nav>
+  <div class="sfoot">Saved in this browser</div>
+</aside>
+<div class="scrim" id="scrim"></div>
+<main class="main">
+<div class="topbar">
+  <button class="iconbtn" id="openSide" aria-label="Open modules"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="3.5" width="15" height="13" rx="2.5"/><path d="M7.5 3.5v13"/></svg></button>
+  <div class="t" id="topTitle">Flashcards</div>
+</div>
 <div class="wrap">
 
   <!-- ============ HOME ============ -->
   <section id="home">
-    <header class="top">
+    <div id="modpanel"></div>
+    <div class="cols">
       <div>
-        <h1>Flashcards</h1>
-        <p class="sub">Recognise it, then write it from a blank page.</p>
+        <h2 class="sect" id="deckHead">Decks</h2>
+        <div id="decks"></div>
       </div>
-      <button class="btn primary small" id="importBtn">Import deck</button>
-    </header>
-    <div id="decks"></div>
-    <div class="card howto">
-      <b style="color:var(--text)">Link it to your Claude project</b>
+      <aside>
+        <div class="card panel" id="modinfo"></div>
+        <div class="card howto">
+      <b style="color:var(--text)">Set up the link to Claude (once per project)</b>
       <ol>
         <li><button class="btn ghost small" id="copyInstr" style="padding:0;min-height:0;display:inline">Copy the Claude instructions</button> and paste them into your Claude project's custom instructions (<a href="https://github.com/victorqfr18/iU-business-it-degree/blob/main/flashcards/CLAUDE_PROJECT.md">read them</a>).</li>
-        <li>In the project, ask Claude: <i>"Make flashcards for Unit 4."</i> It replies with a JSON deck.</li>
-        <li>Copy it, press <b>Import deck</b> here and paste. Same deck id = cards are updated, progress is kept.</li>
-        <li>After a session, press <b>Copy report for Claude</b> and paste it into the project chat so Claude re-teaches what you missed.</li>
+        <li>Open the project on claude.ai, copy the address from the address bar (it looks like <code>claude.ai/project/…</code>), then press <b>Edit</b> on the module and paste it in.</li>
+        <li>Now <b>Get cards</b> copies a prompt and opens the project: paste, send, copy Claude's reply, come back and press <b>Paste deck from Claude</b>.</li>
+        <li>After a session, <b>Send report to Claude</b> does the same with the cards you missed.</li>
       </ol>
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -187,6 +274,8 @@
     <div class="card" id="sumcard"></div>
   </section>
 </div>
+</main>
+</div>
 
 <dialog id="importDlg">
   <form method="dialog" class="in" id="importForm">
@@ -203,6 +292,22 @@
   </form>
 </dialog>
 
+<dialog id="modDlg">
+  <form method="dialog" class="in" id="modForm">
+    <h3 id="modTitle">Module</h3>
+    <label class="field"><span>Module code</span><input type="text" id="modCode" required autocapitalize="characters" autocomplete="off" placeholder="DLBCSDSJCL01"></label>
+    <label class="field"><span>Module name</span><input type="text" id="modName" autocomplete="off" placeholder="Data Structures and Java Class Library"></label>
+    <label class="field"><span>Claude project link</span><input type="text" id="modClaude" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://claude.ai/project/…"></label>
+    <div class="err" id="modErr"></div>
+    <div class="row">
+      <button class="btn small bad" type="button" id="modDelete">Delete module</button>
+      <span class="grow"></span>
+      <button class="btn small" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary small" value="save">Save</button>
+    </div>
+  </form>
+</dialog>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -210,7 +315,7 @@
   "use strict";
 
   /* ---------- storage ---------- */
-  const KEY_DECKS = "fq.importedDecks.v1", KEY_PROG = "fq.progress.v1", KEY_PREF = "fq.prefs.v1";
+  const KEY_DECKS = "fq.importedDecks.v1", KEY_PROG = "fq.progress.v1", KEY_PREF = "fq.prefs.v1", KEY_MODS = "fq.modules.v1";
   const load = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
   const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { toast("Could not save — browser storage is off or full"); } };
 
@@ -218,6 +323,9 @@
   let imported = load(KEY_DECKS, {});        // id -> deck, pasted by the user
   let progress = load(KEY_PROG, {});         // deckId -> cardId -> {box, due, right, wrong, last}
   let prefs = load(KEY_PREF, { size: 20, unit: {} });
+  // Module tabs: {id, code, name, claude (project URL), topic (what I'm studying now)}
+  let modules = load(KEY_MODS, null) || [{ id: "m" + Date.now().toString(36), code: "DLBCSDSJCL01", name: "Data Structures and Java Class Library", claude: "", topic: "" }];
+  const OTHER = "__other";
 
   const DAY = 864e5;
   const INTERVALS = [0, 0, 1, 3, 7, 16, 35];   // days until due, by box (1..6). Box 0 = new.
@@ -315,19 +423,92 @@
 
   const units = deck => [...new Set(deck.cards.map(c => c.unit).filter(Boolean))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
+  /* ---------- modules ---------- */
+  const modKey = code => String(code || "").trim().toUpperCase();
+  const saveMods = () => save(KEY_MODS, modules);
+  const moduleOf = deck => modules.find(m => modKey(m.code) === modKey(deck.module));
+  const orphans = () => Object.values(decks()).filter(d => !moduleOf(d));
+  const decksIn = id => id === OTHER ? orphans() : Object.values(decks()).filter(d => moduleOf(d)?.id === id);
+  function activeId() {
+    if (prefs.active === OTHER && orphans().length) return OTHER;
+    return modules.some(m => m.id === prefs.active) ? prefs.active : (modules[0]?.id || (orphans().length ? OTHER : null));
+  }
+  const activeMod = () => modules.find(m => m.id === activeId());
+  const safeUrl = u => /^https:\/\/\S+$/i.test(String(u || "").trim()) ? String(u).trim() : "";
+
   /* ---------- home ---------- */
   function renderHome() {
-    const all = Object.values(decks());
-    const host = $("#decks");
+    renderSide();
+    renderModPanel();
+    renderDecks();
+  }
+
+  const FOLDER = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M2.5 6.2c0-1 .8-1.7 1.7-1.7h3.4l1.8 2h6.4c1 0 1.7.8 1.7 1.7v6.6c0 1-.8 1.7-1.7 1.7H4.2c-1 0-1.7-.8-1.7-1.7z"/></svg>`;
+
+  function renderSide() {
+    const act = activeId();
+    const dueIn = id => decksIn(id).reduce((n, d) => n + deckStats(d).due, 0);
+    const item = (id, name, code) => {
+      const due = dueIn(id);
+      return `<button class="sitem" data-mod="${esc(id)}" aria-current="${id === act}">${FOLDER}<span class="st"><span class="nm">${esc(name)}</span>${code ? `<span class="cd">${esc(code)}</span>` : ""}</span>${due ? `<span class="n" title="${due} due">${due}</span>` : ""}</button>`;
+    };
+    $("#modlist").innerHTML = modules.map(m => item(m.id, m.name || m.code, m.name ? m.code : "")).join("")
+      + (orphans().length ? item(OTHER, "Other decks", "") : "")
+      || `<p class="sfoot" style="border:0">No modules yet.</p>`;
+    const m = activeMod();
+    $("#topTitle").textContent = m ? (m.name || m.code) : act === OTHER ? "Other decks" : "Flashcards";
+    document.title = m ? `${m.code} · Flashcards` : "Flashcards";
+  }
+
+  function renderModPanel() {
+    const m = activeMod(), host = $("#modpanel"), info = $("#modinfo");
+    $("#deckHead").hidden = !activeId();
+    info.hidden = !m;
+    if (!m) {
+      host.innerHTML = activeId() === OTHER
+        ? `<div class="crumb">Modules</div><div class="phead"><h1>Other decks</h1></div><p class="sub" style="margin:-8px 0 20px">These decks belong to a module with no folder. Make a module with the same code to move them there.</p>`
+        : `<div class="card empty" style="margin-top:40px">No modules yet.<br><br><button class="btn primary" id="addMod2">New module</button></div>`;
+      return;
+    }
+    const link = safeUrl(m.claude);
+    host.innerHTML = `
+      <div class="crumb">Modules / ${esc(m.code)}</div>
+      <div class="phead">
+        <h1>${esc(m.name || m.code)}</h1>
+        <button class="btn small" id="editMod">Edit</button>
+      </div>
+      <div class="composer">
+        <textarea id="topic" rows="2" placeholder="What are you studying right now?" aria-label="What are you studying right now?">${esc(m.topic || "")}</textarea>
+        <div class="crow">
+          <button class="chip" id="pasteDeck" title="Import the deck Claude sent (from the clipboard)">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="2.5" width="10" height="12" rx="2"/><path d="M6 2.5h4v2H6z"/></svg>Paste deck</button>
+          <button class="chip" id="importBtn" title="Import a .json deck file">Import</button>
+          <span class="grow"></span>
+          <button class="send" id="askClaude" title="Copy a prompt and open your Claude project">Get cards
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l6-6M5 4h5v5"/></svg></button>
+        </div>
+      </div>`;
+    info.innerHTML = `
+      <h3>Claude project</h3>
+      ${link
+        ? `<p><span class="claude-ok">✓ Linked.</span> <b>Get cards</b> and the reports open <a href="${esc(link)}" target="_blank" rel="noopener">your project</a>.</p>`
+        : `<p>Not linked yet. Add the project's address so <b>Get cards</b> opens it directly.</p><button class="btn small primary" id="linkMod">Add Claude project link</button>`}
+      <h3 style="margin-top:14px">Module code</h3>
+      <p>${esc(m.code)} · ${decksIn(m.id).length} deck${decksIn(m.id).length === 1 ? "" : "s"}</p>
+      <button class="btn small" id="editMod2">Edit module</button>`;
+  }
+
+  function renderDecks() {
+    const id = activeId(), all = id ? decksIn(id) : [], host = $("#decks");
+    if (!id) { host.innerHTML = ""; return; }
     if (!all.length) {
-      host.innerHTML = `<div class="card empty">No decks yet.<br>Ask your Claude project for flashcards, then press <b>Import deck</b>.</div>`;
+      host.innerHTML = `<div class="card empty">No decks here yet.<br>Type what you're studying above and press <b>Get cards</b>.</div>`;
       return;
     }
     host.innerHTML = all.map(d => {
       const s = deckStats(d), us = units(d), pct = n => (n / s.total * 100).toFixed(2) + "%";
       const unitSel = prefs.unit[d.id] || "";
       return `<article class="card deck" data-id="${esc(d.id)}">
-        ${d.module ? `<div class="mod">${esc(d.module)}</div>` : ""}
         <h2>${esc(d.title)}</h2>
         ${d.description ? `<p>${fmt(d.description)}</p>` : ""}
         <div class="stats">
@@ -349,7 +530,7 @@
           ${us.length > 1 ? `<select data-act="unit" aria-label="Filter by unit"><option value="">All units</option>${us.map(u => `<option ${u === unitSel ? "selected" : ""}>${esc(u)}</option>`).join("")}</select>` : ""}
         </div>
         <div class="deckfoot">
-          <button data-act="report">Copy weak-spot report for Claude</button>
+          <button data-act="report">Send weak-spot report to Claude</button>
           <button data-act="reset">Reset progress</button>
           ${imported[d.id] ? `<button data-act="delete" class="danger">Delete deck</button>` : ""}
           <span class="grow"></span>
@@ -359,12 +540,123 @@
     }).join("");
   }
 
+  /* ---------- sidebar ---------- */
+  const app = $("#app"), narrow = matchMedia("(max-width:860px)");
+  const openSide = () => narrow.matches ? app.classList.add("open") : setCollapsed(false);
+  const closeSide = () => app.classList.remove("open");
+  function setCollapsed(v) { app.classList.toggle("collapsed", v); prefs.collapsed = v; save(KEY_PREF, prefs); }
+  app.classList.toggle("collapsed", !!prefs.collapsed);
+  $("#openSide").addEventListener("click", openSide);
+  $("#closeSide").addEventListener("click", closeSide);
+  $("#scrim").addEventListener("click", closeSide);
+  $("#collapseBtn").addEventListener("click", () => setCollapsed(true));
+  $("#addMod").addEventListener("click", () => { closeSide(); editModule(null); });
+  $("#modlist").addEventListener("click", e => {
+    const t = e.target.closest(".sitem"); if (!t) return;
+    prefs.active = t.dataset.mod; save(KEY_PREF, prefs);
+    closeSide();
+    home();   // leaves a running session; answers so far are already saved
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && app.classList.contains("open")) closeSide(); });
+
+  $("#modpanel").addEventListener("click", e => {
+    const id = e.target.closest("button")?.id, m = activeMod();
+    if (id === "addMod2") editModule(null);
+    else if (id === "editMod") editModule(m);
+    else if (id === "importBtn") openImport("");
+    else if (id === "pasteDeck") pasteDeck();
+    else if (id === "askClaude") {
+      const topic = (m.topic || "").trim(), deckId = modKey(m.code).toLowerCase() + "-" + (topic ? slug(topic) : "current");
+      const existing = decksIn(m.id).map(d => `"${d.id}" (${d.title})`);
+      sendToClaude(`Make a flashcard deck for ${m.code}${m.name ? ` (${m.name})` : ""}${topic ? ` on: ${topic}` : " on what I'm studying right now"}.
+Base it on the course material in this project. Use the flashcard JSON format from the project instructions, with "module": "${m.code}" and deck id "${deckId}".${existing.length ? `\nDecks I already have for this module: ${existing.join(", ")}. Don't repeat their cards.` : ""}`, m, "Prompt copied");
+    }
+  });
+  $("#modpanel").addEventListener("input", e => {
+    if (e.target.id !== "topic") return;
+    activeMod().topic = e.target.value; saveMods();
+  });
+  // Enter sends, like the Claude composer; Shift+Enter makes a new line.
+  $("#modpanel").addEventListener("keydown", e => {
+    if (e.target.id === "topic" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("#askClaude").click(); }
+  });
+  $("#modinfo").addEventListener("click", e => {
+    const id = e.target.closest("button")?.id;
+    if (id === "linkMod") editModule(activeMod(), true);
+    else if (id === "editMod2") editModule(activeMod());
+  });
+
+  /* Copy text, then open the module's Claude project (if linked) so it can be pasted straight into a chat. */
+  function sendToClaude(text, m, what) {
+    const link = safeUrl(m?.claude);
+    const copied = copySync(text);
+    if (link) {
+      window.open(link, "_blank", "noopener");
+      toast(copied ? `${what} — paste it into a new chat in the project` : "Couldn't copy automatically");
+    } else {
+      toast(copied ? `${what}. Add the Claude project link (Edit) to open it directly next time.` : "Couldn't copy automatically");
+    }
+    if (!copied) prompt("Copy this and paste it into Claude:", text);
+  }
+
+  async function pasteDeck() {
+    let text = "";
+    try { text = await navigator.clipboard.readText(); } catch { /* not allowed: fall back to the dialog */ }
+    if (!text.trim()) return openImport("", "Paste Claude's reply below (long-press → Paste on a phone).");
+    try { importDeck(parseDeckText(text)); }
+    catch (err) { openImport(text, "The clipboard didn't hold a valid deck: " + err.message + "\nCopy Claude's whole reply (or just the JSON block) and try again."); }
+  }
+
+  /* ---------- module dialog ---------- */
+  const mdlg = $("#modDlg");
+  let editing = null;
+  function editModule(m, focusLink) {
+    editing = m;
+    $("#modTitle").textContent = m ? "Edit module" : "Add a module";
+    $("#modCode").value = m?.code || "";
+    $("#modName").value = m?.name || "";
+    $("#modClaude").value = m?.claude || "";
+    $("#modErr").textContent = "";
+    $("#modDelete").hidden = !m;
+    mdlg.showModal();
+    (focusLink ? $("#modClaude") : $("#modCode")).focus();
+  }
+  $("#modForm").addEventListener("submit", e => {
+    if (e.submitter && e.submitter.value === "cancel") return;
+    e.preventDefault();
+    const code = $("#modCode").value.trim(), name = $("#modName").value.trim(), claude = $("#modClaude").value.trim();
+    if (!code) return $("#modErr").textContent = "Give the module a code, e.g. DLBCSDSJCL01.";
+    if (modules.some(m => m !== editing && modKey(m.code) === modKey(code))) return $("#modErr").textContent = "There is already a tab for " + code + ".";
+    const link = claude && !/^https?:\/\//i.test(claude) ? "https://" + claude : claude;
+    if (link && !safeUrl(link)) return $("#modErr").textContent = "The Claude link should look like https://claude.ai/project/…";
+    if (editing) {
+      if (modKey(editing.code) !== modKey(code)) {   // keep imported decks in this tab when the code changes
+        Object.values(imported).forEach(d => { if (modKey(d.module) === modKey(editing.code)) d.module = code; });
+        save(KEY_DECKS, imported);
+      }
+      Object.assign(editing, { code, name, claude: link });
+    } else {
+      const m = { id: "m" + Date.now().toString(36), code, name, claude: link, topic: "" };
+      modules.push(m);
+      prefs.active = m.id; save(KEY_PREF, prefs);
+    }
+    saveMods(); mdlg.close(); renderHome();
+  });
+  $("#modDelete").addEventListener("click", () => {
+    const m = editing, mine = Object.values(imported).filter(d => modKey(d.module) === modKey(m.code));
+    if (!confirm(`Delete the ${m.code} tab${mine.length ? ` and its ${mine.length} imported deck${mine.length > 1 ? "s" : ""} (with progress)` : ""}?`)) return;
+    mine.forEach(d => { delete imported[d.id]; delete progress[d.id]; });
+    modules = modules.filter(x => x !== m);
+    save(KEY_DECKS, imported); save(KEY_PROG, progress); saveMods();
+    mdlg.close(); renderHome();
+  });
+
   $("#decks").addEventListener("click", e => {
     const b = e.target.closest("button[data-act]"); if (!b) return;
     const deck = decks()[b.closest("[data-id]").dataset.id];
     const act = b.dataset.act;
     if (act === "study" || act === "weak" || act === "all") startSession(deck, act);
-    else if (act === "report") copy(weakReport(deck), "Report copied — paste it into your Claude project");
+    else if (act === "report") sendToClaude(weakReport(deck), moduleOf(deck), "Report copied");
     else if (act === "reset") {
       if (confirm(`Reset all progress for "${deck.title}"?`)) { delete progress[deck.id]; save(KEY_PROG, progress); renderHome(); }
     } else if (act === "delete") {
@@ -574,7 +866,7 @@
       ${S.log.length ? `<h3 style="margin:18px 0 0;font-size:17px">Missed first time</h3>
         <ul class="missed">${S.log.map(({ card: c, given }) => `<li><div>${fmt(c.front)}</div><div class="a">${looksLikeCode(answerText(c)) ? `<pre>${esc(answerText(c))}</pre>` : "Answer: " + fmt(answerText(c))}</div></li>`).join("")}</ul>` : `<p>Clean run. Nothing to send back.</p>`}
       <div class="row">
-        ${S.log.length ? `<button class="btn primary" id="copyReport">Copy report for Claude</button>` : ""}
+        ${S.log.length ? `<button class="btn primary" id="copyReport">Send report to Claude ↗</button>` : ""}
         <span class="grow"></span>
         <button class="btn" id="again">Back to decks</button>
       </div>`;
@@ -582,7 +874,7 @@
   }
 
   $("#sumcard").addEventListener("click", e => {
-    if (e.target.id === "copyReport") copy(sessionReport(), "Report copied — paste it into your Claude project");
+    if (e.target.id === "copyReport") sendToClaude(sessionReport(), moduleOf(S.deck), "Report copied");
     if (e.target.id === "again") home();
   });
 
@@ -621,7 +913,20 @@ ${rows.map((r, i) => cardLine(r.c, r.p.lastWrong, i).replace(/^(\d+\. )/, `$1(${
 
   /* ---------- import ---------- */
   const dlg = $("#importDlg");
-  $("#importBtn").addEventListener("click", () => { $("#importErr").textContent = ""; $("#importText").value = ""; dlg.showModal(); $("#importText").focus(); });
+  function openImport(text, msg = "") { $("#importErr").textContent = msg; $("#importText").value = text; dlg.showModal(); $("#importText").focus(); }
+  function importDeck(deck) {
+    const m = activeMod();
+    if (!deck.module && m) deck.module = m.code;               // no module in the JSON: it belongs to the open tab
+    if (deck.module && !moduleOf(deck)) modules.push({ id: "m" + Date.now().toString(36), code: deck.module, name: "", claude: "", topic: "" });
+    const existed = !!decks()[deck.id];
+    imported[deck.id] = deck;
+    save(KEY_DECKS, imported); saveMods();
+    const home = moduleOf(deck);
+    prefs.active = home ? home.id : OTHER; save(KEY_PREF, prefs);
+    if (dlg.open) dlg.close();
+    renderHome();
+    toast(`${existed ? "Updated" : "Imported"} “${deck.title}” — ${deck.cards.length} cards`);
+  }
   $("#importFile").addEventListener("change", async e => {
     const f = e.target.files[0]; if (!f) return;
     $("#importText").value = await f.text();
@@ -631,13 +936,7 @@ ${rows.map((r, i) => cardLine(r.c, r.p.lastWrong, i).replace(/^(\d+\. )/, `$1(${
     if (e.submitter && e.submitter.value === "cancel") return;
     e.preventDefault();
     try {
-      const deck = parseDeckText($("#importText").value);
-      const existed = !!decks()[deck.id];
-      imported[deck.id] = deck;
-      save(KEY_DECKS, imported);
-      dlg.close();
-      renderHome();
-      toast(`${existed ? "Updated" : "Imported"} “${deck.title}” — ${deck.cards.length} cards`);
+      importDeck(parseDeckText($("#importText").value));
     } catch (err) { $("#importErr").textContent = err.message; }
   });
 
@@ -647,6 +946,18 @@ ${rows.map((r, i) => cardLine(r.c, r.p.lastWrong, i).replace(/^(\d+\. )/, `$1(${
 
   let tt;
   function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 2600); }
+
+  // Synchronous copy, so it still counts as part of the tap when a new tab opens right after.
+  function copySync(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.readOnly = true; ta.style.position = "fixed"; ta.style.top = "0"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0, text.length);
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch { ok = false; }
+    ta.remove();
+    if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(text).catch(() => {}); ok = true; }
+    return ok;
+  }
 
   async function copy(text, msg) {
     try { await navigator.clipboard.writeText(text); toast(msg); }
